@@ -2,6 +2,7 @@
   "name": "novapartyvenues",
   "compatibility_date": "2026-11-12",
   "assets": {
-    "directory": "./public"
+    "directory": "./public",
+    "not_found_handling": "404-page"
   }
 }

@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NoVA Party Venues | Kids' Birthday Party Venues in Northern Virginia</title>
 <meta name="description" content="Compare kids' birthday party venues across Northern Virginia. Filter by type, city, guest count, age, price, food and outside-catering policy.">
+<link rel="canonical" href="https://novapartyvenues.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NoVA Party Venues">
+<meta property="og:title" content="NoVA Party Venues | Kids' Birthday Party Venues in Northern Virginia">
+<meta property="og:description" content="Compare kids' birthday party venues across Northern Virginia by type, city, guest count, age, price and food policy.">
+<meta property="og:url" content="https://novapartyvenues.com/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"NoVA Party Venues","url":"https://novapartyvenues.com/"}</script>
 <style>
   :root {
     --bg: #fafaf7; --card: #ffffff; --ink: #1f2430; --muted: #667085; --line: #e4e4de;
@@ -53,6 +60,9 @@
   .empty { padding: 32px; text-align: center; color: var(--muted); background: var(--card); border: 1px dashed var(--line); border-radius: 12px; grid-column: 1 / -1; }
   footer { max-width: 1150px; margin: 0 auto; padding: 24px 16px 40px; color: var(--muted); font-size: .88rem; }
   footer .owner { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .browse { max-width: 1150px; margin: 0 auto; padding: 8px 16px 0; }
+  .browse h2 { font-size: 1.05rem; margin: 18px 0 6px; }
+  .browse a { color: var(--brand); }
 </style>
 </head>
 <body>
@@ -142,16 +152,18 @@
   </main>
 </div>
 
+<!-- BROWSE:START -->
+<section class="browse"><h2>Browse by city</h2><p><a href="/cities/reston/">Reston (27)</a> &middot; <a href="/cities/herndon/">Herndon (18)</a> &middot; <a href="/cities/chantilly/">Chantilly (9)</a> &middot; <a href="/cities/sterling/">Sterling (7)</a> &middot; <a href="/cities/fairfax/">Fairfax (6)</a> &middot; <a href="/cities/ashburn/">Ashburn (5)</a> &middot; <a href="/cities/centreville/">Centreville (4)</a> &middot; <a href="/cities/falls-church/">Falls Church (4)</a> &middot; <a href="/cities/springfield/">Springfield (3)</a></p><h2>Browse by venue type</h2><p><a href="/types/restaurant-private-dining/">Restaurant &amp; Private Dining (24)</a> &middot; <a href="/types/indoor-play-trampoline-arcade/">Indoor Play, Trampoline &amp; Arcade (19)</a> &middot; <a href="/types/nature-park-pavilion/">Nature, Park &amp; Pavilion (14)</a> &middot; <a href="/types/pool-rec-center/">Pool &amp; Rec Center (13)</a> &middot; <a href="/types/active-sports-climbing-ninja/">Active, Sports, Climbing &amp; Ninja (9)</a> &middot; <a href="/types/creative-craft-art/">Creative, Craft &amp; Art (9)</a> &middot; <a href="/types/bowling-golf-skating/">Bowling, Golf &amp; Skating (4)</a> &middot; <a href="/types/community-rental-hall/">Community &amp; Rental Hall (3)</a> &middot; <a href="/types/farm-zoo-animal/">Farm, Zoo &amp; Animal (3)</a> &middot; <a href="/types/museum-educational/">Museum &amp; Educational (3)</a></p><p><a href="/venues/">See every venue in one list</a></p></section>
+<!-- BROWSE:END -->
+
 <footer>
-  <div class="owner">
-    <strong>Own a party venue?</strong> Claim or correct your listing.
-    <!-- TODO: replace with your real contact address or a form link -->
-    <a href="mailto:hello@example.com">Contact us</a>
-  </div>
+  <!-- TODO: once you have a real contact email, add an "Own a venue? Claim your listing" line here and set CONTACT in scripts/build.js -->
+
   <p>Prices and policies are gathered from venue websites and can change. "Starting price" is the lowest total package price we found, not a quote. Always confirm details, availability and current pricing directly with the venue before booking. "Recommended by neighbors" counts how often a venue was suggested in a local parents' group.</p>
 </footer>
 
-<script src="data.js"></script>
+<script src="/data.js"></script>
+<script src="/assets/slugs.js"></script>
 <script>
 (function () {
   var V = window.VENUES || [];
@@ -242,6 +254,8 @@
     if (v.k === "Yes") tags.push("Outside food OK");
     if (v.k === "Cake only") tags.push("Outside cake only");
     var actions = "";
+    var slug = (window.SLUGS || {})[v.n];
+    if (slug) actions += '<a class="btn ghost" href="/venues/' + esc(slug) + '/">Details</a>';
     if (v.w) actions += '<a class="btn primary" href="' + esc(v.w) + '" target="_blank" rel="noopener nofollow">Website</a>';
     if (v.p) actions += '<a class="btn ghost" href="tel:' + esc(v.p.replace(/[^0-9+]/g, "")) + '">Call</a>';
     if (v.a) actions += '<a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Map</a>';
