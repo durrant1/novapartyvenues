@@ -39,6 +39,7 @@
     <div class="pf">
       <div class="field wide"><label for="q">Search</label><input type="search" id="q" placeholder="Venue name or keyword"></div>
       <div class="field wide"><span class="lbl" id="city-l">City</span><div class="ms" id="city"></div></div>
+      <div class="field wide mtype"><span class="lbl" id="type-l">Venue type</span><div class="ms" id="type"></div></div>
       <div class="field"><label for="guests">Guests</label><input type="number" id="guests" min="1" inputmode="numeric" placeholder="e.g. 20"></div>
       <div class="field"><label for="age">Child's age</label><input type="number" id="age" min="0" max="17" inputmode="numeric" placeholder="e.g. 6"></div>
     </div>
@@ -107,7 +108,7 @@
   var HAVE_MAP = Object.keys(COORDS).length > 0;
   var LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/";
   var $ = function (id) { return document.getElementById(id); };
-  var F = { city: [], setting: [], price: [], food: [], catering: [] };   // multi-select values (OR within a filter, AND across filters)
+  var F = { city: [], type: [], setting: [], price: [], food: [], catering: [] };   // multi-select values (OR within a filter, AND across filters)
   var curTypes = [];
   var curList = [];
   var showFav = false;
@@ -163,6 +164,7 @@
     btn.addEventListener("click", function () { panel.hidden ? open() : close(false); });
     panel.addEventListener("change", function () {
       F[id] = [].slice.call(panel.querySelectorAll("input:checked")).map(function (i) { return i.value; });
+      if (id === "type") curTypes = F.type.slice();
       sync(); render();
     });
     panel.addEventListener("click", function (e) {
@@ -175,7 +177,9 @@
       close: function () { close(false); },
       contains: function (n) { return root.contains(n); },
       text: function () { return F[id].map(function (v) { return labels[v]; }).join(", "); },
-      clear: function () { F[id] = []; [].slice.call(panel.querySelectorAll("input")).forEach(function (i) { i.checked = false; }); sync(); }
+      clear: function () { F[id] = []; [].slice.call(panel.querySelectorAll("input")).forEach(function (i) { i.checked = false; }); sync(); },
+      set: function (arr) { F[id] = arr.slice(); [].slice.call(panel.querySelectorAll("input")).forEach(function (i) { i.checked = arr.indexOf(i.value) > -1; }); sync(); },
+      counts: function (c) { [].slice.call(panel.querySelectorAll("label")).forEach(function (l) { var n = l.querySelector(".n"), i = l.querySelector("input"); if (n) n.textContent = c[i.value] || 0; }); }
     };
     sync();
   }
@@ -185,6 +189,8 @@
 
   var cityCount = {}; V.forEach(function (v) { cityCount[v.c] = (cityCount[v.c] || 0) + 1; });
   makeMs("city", CITIES.map(function (c) { return { v: c, l: c, n: cityCount[c] }; }), "All cities", "cities");
+  var typeCount = {}; V.forEach(function (v) { typeCount[v.t] = (typeCount[v.t] || 0) + 1; });
+  makeMs("type", TYPES.map(function (t) { return { v: t, l: typeLabel(t), n: typeCount[t] }; }), "All types", "types");
   makeMs("setting", [{ v: "Indoor", l: "Indoor" }, { v: "Outdoor", l: "Outdoor" }], "Any", "settings");
   makeMs("price", [{ v: "0-199", l: "Under $200" }, { v: "200-399", l: "$200 to $399" }, { v: "400-699", l: "$400 to $699" }, { v: "700-99999", l: "$700 and up" }], "Any", "price ranges");
   makeMs("food", [{ v: "Yes", l: "Food included" }, { v: "Add-on", l: "Food as an add-on" }, { v: "No", l: "Bring your own food" }], "Any", "options");
@@ -306,6 +312,7 @@
       h += '<button type="button" class="chip t' + tIdx(t) + '" data-t="' + esc(t) + '" aria-pressed="' + on + '"' + (n === 0 && !on ? " disabled" : "") + '><span class="dot"></span>' + esc(typeLabel(t)) + ' <span class="n">' + n + '</span></button>';
     });
     $("chips").innerHTML = h;
+    if (MS.type) MS.type.counts(counts);
   }
   $("chips").addEventListener("click", function (e) {
     var b = e.target.closest ? e.target.closest(".chip") : null;
@@ -313,6 +320,7 @@
     var t = b.getAttribute("data-t");
     if (t === "") curTypes = [];
     else { var i = curTypes.indexOf(t); if (i > -1) curTypes.splice(i, 1); else curTypes.push(t); }
+    MS.type.set(curTypes);
     render();
   });
 

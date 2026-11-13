@@ -80,7 +80,10 @@ input:focus, select:focus { border-color: var(--orange); box-shadow: 0 0 0 4px r
 
 /* category chips */
 .chips { display: flex; gap: 8px; overflow-x: auto; padding: 22px 2px 8px; scrollbar-width: thin; }
-@media (min-width: 900px) { .chips { flex-wrap: wrap; overflow: visible; } }
+@media (min-width: 800px) { .chips { flex-wrap: wrap; overflow: visible; } }
+/* Phones and small tablets: types live in a multi-select dropdown instead of a scrolling chip row */
+@media (max-width: 799px) { .chips { display: none; } }
+@media (min-width: 800px) { .pf .mtype { display: none; } }
 .chip { flex: none; display: inline-flex; align-items: center; gap: 8px; font: inherit; font-weight: 700; font-size: .9rem; padding: 9px 15px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; transition: background-color .2s, border-color .2s, transform .15s; }
 .chip:hover { border-color: var(--ink); }
 .chip:active { transform: scale(.96); }
