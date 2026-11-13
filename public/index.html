@@ -11,6 +11,9 @@
 <meta property="og:title" content="NoVA Party Venues | Kids' Birthday Party Venues in Northern Virginia">
 <meta property="og:description" content="Compare kids' birthday party venues across Northern Virginia by type, city, guest count, age, price and food policy.">
 <meta property="og:url" content="https://novapartyvenues.com/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400..700&display=swap">
@@ -29,7 +32,7 @@
   <form class="panel" id="panel" role="search" aria-label="Filter venues" onsubmit="return false">
     <div class="pf">
       <div class="field wide"><label for="q">Search</label><input type="search" id="q" placeholder="Venue name or keyword"></div>
-      <div class="field wide"><label for="city">City</label><select id="city"><option value="">All cities</option></select></div>
+      <div class="field wide"><span class="lbl" id="city-l">City</span><div class="ms" id="city"></div></div>
       <div class="field"><label for="guests">Guests</label><input type="number" id="guests" min="1" inputmode="numeric" placeholder="e.g. 20"></div>
       <div class="field"><label for="age">Child's age</label><input type="number" id="age" min="0" max="17" inputmode="numeric" placeholder="e.g. 6"></div>
     </div>
@@ -38,34 +41,40 @@
       <button class="linkbtn" id="reset" type="button" hidden>Clear all filters</button>
     </div>
     <div class="more" id="more" hidden>
-      <div class="field"><label for="setting">Indoor or outdoor</label>
-        <select id="setting"><option value="">Any</option><option>Indoor</option><option>Outdoor</option><option>Both</option></select></div>
-      <div class="field"><label for="price">Starting price</label>
-        <select id="price"><option value="">Any</option><option value="0-199">Under $200</option><option value="200-399">$200 to $399</option><option value="400-699">$400 to $699</option><option value="700-99999">$700 and up</option></select></div>
-      <div class="field"><label for="food">Food</label>
-        <select id="food"><option value="">Any</option><option value="Yes">Food included</option><option value="Add-on">Food as an add-on</option><option value="No">Bring your own food</option></select></div>
-      <div class="field"><label for="catering">Outside food</label>
-        <select id="catering"><option value="">Any</option><option value="Yes">Outside food allowed</option><option value="Cake only">Cake or cupcakes only</option></select>
+      <div class="field"><span class="lbl" id="setting-l">Indoor or outdoor</span><div class="ms" id="setting"></div></div>
+      <div class="field"><span class="lbl" id="price-l">Starting price</span><div class="ms" id="price"></div></div>
+      <div class="field"><span class="lbl" id="food-l">Food</span><div class="ms" id="food"></div></div>
+      <div class="field"><span class="lbl" id="catering-l">Outside food</span><div class="ms" id="catering"></div>
         <div class="hint">Only about a third of venues state a policy.</div></div>
       <label class="check"><input type="checkbox" id="pricedOnly"> Only show venues with a listed price</label>
     </div>
   </form>
 
-  <div class="chips" id="chips" role="group" aria-label="Venue type"></div>
+  <div class="chips" id="chips" role="group" aria-label="Venue types (pick any number)"></div>
 
   <main>
     <div class="bar">
       <div class="count" id="count" aria-live="polite"></div>
-      <label class="sort">Sort by
-        <select id="sort">
-          <option value="rec">Most recommended</option>
-          <option value="name">Name (A to Z)</option>
-          <option value="priceAsc">Price, low to high</option>
-          <option value="capDesc">Largest parties first</option>
-        </select>
-      </label>
+      <div class="bar-right">
+        <div class="seg" id="seg" role="group" aria-label="Results view" hidden>
+          <button type="button" data-v="list" aria-pressed="false">List</button>
+          <button type="button" data-v="side" aria-pressed="false">List and map</button>
+          <button type="button" data-v="map" aria-pressed="false">Map</button>
+        </div>
+        <label class="sort">Sort by
+          <select id="sort">
+            <option value="rec">Most recommended</option>
+            <option value="name">Name (A to Z)</option>
+            <option value="priceAsc">Price, low to high</option>
+            <option value="capDesc">Largest parties first</option>
+          </select>
+        </label>
+      </div>
     </div>
-    <div class="grid" id="results"></div>
+    <div class="rwrap" id="rwrap" data-view="list">
+      <div class="rlist"><div class="grid" id="results"></div></div>
+      <aside class="rmap" id="mapbox" aria-label="Map of venues"><div id="map"></div><p class="mapnote" id="mapnote" aria-live="polite"></p></aside>
+    </div>
   </main>
 </div>
 
@@ -80,11 +89,17 @@
 
 <script src="/data.js"></script>
 <script src="/assets/slugs.js"></script>
+<script src="/coords.js"></script>
 <script>
 (function () {
   var V = window.VENUES || [];
+  var COORDS = window.COORDS || {};
+  var HAVE_MAP = Object.keys(COORDS).length > 0;
+  var LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/";
   var $ = function (id) { return document.getElementById(id); };
-  var curType = "";
+  var F = { city: [], setting: [], price: [], food: [], catering: [] };   // multi-select values (OR within a filter, AND across filters)
+  var curTypes = [];
+  var curList = [];
 
   // Numeric age bounds from labels like "5-12", "4+", "All ages". Unknown = null (never excluded).
   V.forEach(function (v) {
@@ -96,16 +111,72 @@
 
   var TYPES = Array.from(new Set(V.map(function (v) { return v.t; }))).sort();
   var CITIES = Array.from(new Set(V.map(function (v) { return v.c; }))).sort();
-  CITIES.forEach(function (c) { var o = document.createElement("option"); o.value = c; o.textContent = c; $("city").appendChild(o); });
-
   function tIdx(t) { return TYPES.indexOf(t) % 12; }
   function typeLabel(t) { var p = t.split(" / "); return p.length > 1 ? p.slice(0, -1).join(", ") + " & " + p[p.length - 1] : p[0]; }
   function esc(s) { var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
   function money(n) { return "$" + (n % 1 ? n.toFixed(2) : n.toLocaleString("en-US")); }
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
 
-  var MORE = ["setting", "price", "food", "catering"];
-  var ALL_FIELDS = ["q", "city", "guests", "age"].concat(MORE);
-  ALL_FIELDS.concat(["pricedOnly", "sort"]).forEach(function (id) {
+  /* ---------- multi-select dropdowns ---------- */
+  var MS = {};
+  function makeMs(id, opts, allLabel, noun) {
+    var root = $(id);
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "ms-btn"; btn.id = id + "-b";
+    btn.setAttribute("aria-haspopup", "true"); btn.setAttribute("aria-expanded", "false");
+    btn.setAttribute("aria-labelledby", id + "-l " + btn.id);
+    var panel = document.createElement("div");
+    panel.className = "ms-panel"; panel.hidden = true;
+    panel.setAttribute("role", "group"); panel.setAttribute("aria-labelledby", id + "-l");
+    panel.innerHTML = opts.map(function (o) {
+      return '<label><input type="checkbox" value="' + esc(o.v) + '"><span>' + esc(o.l) + '</span>' + (o.n != null ? '<span class="n">' + o.n + '</span>' : "") + '</label>';
+    }).join("") + '<div class="ms-foot"><button type="button" class="linkbtn" data-a="clear">Clear</button><button type="button" class="linkbtn" data-a="done">Done</button></div>';
+    root.appendChild(btn); root.appendChild(panel);
+    var labels = {}; opts.forEach(function (o) { labels[o.v] = o.l; });
+
+    function sync() {
+      var sel = F[id];
+      btn.textContent = !sel.length ? allLabel : sel.length === 1 ? labels[sel[0]] : sel.length === 2 ? labels[sel[0]] + ", " + labels[sel[1]] : sel.length + " " + noun;
+      btn.classList.toggle("on", sel.length > 0);
+    }
+    function close(focus) { panel.hidden = true; btn.setAttribute("aria-expanded", "false"); if (focus) btn.focus(); }
+    function open() {
+      Object.keys(MS).forEach(function (k) { if (k !== id) MS[k].close(); });
+      panel.hidden = false; btn.setAttribute("aria-expanded", "true");
+      panel.style.left = ""; panel.style.right = "";
+      var r = panel.getBoundingClientRect();
+      if (r.right > window.innerWidth - 8) { panel.style.left = "auto"; panel.style.right = "0"; }
+    }
+    btn.addEventListener("click", function () { panel.hidden ? open() : close(false); });
+    panel.addEventListener("change", function () {
+      F[id] = [].slice.call(panel.querySelectorAll("input:checked")).map(function (i) { return i.value; });
+      sync(); render();
+    });
+    panel.addEventListener("click", function (e) {
+      var a = e.target.getAttribute && e.target.getAttribute("data-a");
+      if (a === "clear") { MS[id].clear(); render(); }
+      if (a === "done") close(true);
+    });
+    root.addEventListener("keydown", function (e) { if (e.key === "Escape" && !panel.hidden) { e.stopPropagation(); close(true); } });
+    MS[id] = {
+      close: function () { close(false); },
+      contains: function (n) { return root.contains(n); },
+      clear: function () { F[id] = []; [].slice.call(panel.querySelectorAll("input")).forEach(function (i) { i.checked = false; }); sync(); }
+    };
+    sync();
+  }
+  document.addEventListener("click", function (e) {
+    Object.keys(MS).forEach(function (k) { if (!MS[k].contains(e.target)) MS[k].close(); });
+  });
+
+  var cityCount = {}; V.forEach(function (v) { cityCount[v.c] = (cityCount[v.c] || 0) + 1; });
+  makeMs("city", CITIES.map(function (c) { return { v: c, l: c, n: cityCount[c] }; }), "All cities", "cities");
+  makeMs("setting", [{ v: "Indoor", l: "Indoor" }, { v: "Outdoor", l: "Outdoor" }], "Any", "settings");
+  makeMs("price", [{ v: "0-199", l: "Under $200" }, { v: "200-399", l: "$200 to $399" }, { v: "400-699", l: "$400 to $699" }, { v: "700-99999", l: "$700 and up" }], "Any", "price ranges");
+  makeMs("food", [{ v: "Yes", l: "Food included" }, { v: "Add-on", l: "Food as an add-on" }, { v: "No", l: "Bring your own food" }], "Any", "options");
+  makeMs("catering", [{ v: "Yes", l: "Outside food allowed" }, { v: "Cake only", l: "Cake or cupcakes only" }], "Any", "options");
+
+  ["q", "guests", "age", "pricedOnly", "sort"].forEach(function (id) {
     $(id).addEventListener("input", render);
     $(id).addEventListener("change", render);
   });
@@ -115,26 +186,27 @@
     $("moreBtn").setAttribute("aria-expanded", String(open));
   });
   function clearAll() {
-    ALL_FIELDS.forEach(function (id) { $(id).value = ""; });
+    ["q", "guests", "age"].forEach(function (id) { $(id).value = ""; });
     $("pricedOnly").checked = false;
-    curType = "";
+    Object.keys(MS).forEach(function (k) { MS[k].clear(); });
+    curTypes = [];
     render();
   }
   $("reset").addEventListener("click", clearAll);
 
+  /* ---------- filtering ---------- */
   function matches(v, skipType) {
     var q = $("q").value.trim().toLowerCase();
     if (q && (v.n + " " + v.t + " " + v.c + " " + (v.pn || "")).toLowerCase().indexOf(q) === -1) return false;
-    if (!skipType && curType && v.t !== curType) return false;
-    if ($("city").value && v.c !== $("city").value) return false;
-    if ($("setting").value && v.s !== $("setting").value) return false;
-    if ($("food").value && v.f !== $("food").value) return false;
-    if ($("catering").value && v.k !== $("catering").value) return false;
-    var pr = $("price").value;
-    if (pr) {
+    if (!skipType && curTypes.length && curTypes.indexOf(v.t) === -1) return false;
+    if (F.city.length && F.city.indexOf(v.c) === -1) return false;
+    // A venue that offers "Both" matches Indoor and Outdoor.
+    if (F.setting.length && !F.setting.some(function (s) { return v.s === s || v.s === "Both"; })) return false;
+    if (F.food.length && F.food.indexOf(v.f) === -1) return false;
+    if (F.catering.length && F.catering.indexOf(v.k) === -1) return false;
+    if (F.price.length) {
       if (v.pr == null) return false;
-      var b = pr.split("-");
-      if (v.pr < parseFloat(b[0]) || v.pr > parseFloat(b[1])) return false;
+      if (!F.price.some(function (r) { var b = r.split("-"); return v.pr >= parseFloat(b[0]) && v.pr <= parseFloat(b[1]); })) return false;
     }
     if ($("pricedOnly").checked && v.pr == null) return false;
     var g = parseInt($("guests").value, 10);
@@ -162,7 +234,8 @@
     return list.sort(function (a, b) { return (b.m || 0) - (a.m || 0) || byName(a, b); });
   }
 
-  function card(v) {
+  /* ---------- cards ---------- */
+  function card(v, i) {
     var guests = v.mn != null && v.mx != null ? v.mn + "-" + v.mx : v.mx != null ? "Up to " + v.mx : v.mn != null ? v.mn + "+" : "Ask venue";
     var setting = v.s === "Both" ? "In & out" : (v.s || "Ask venue");
     var slug = (window.SLUGS || {})[v.n];
@@ -178,9 +251,10 @@
     var actions = "";
     if (v.w) actions += '<a class="btn primary" href="' + esc(v.w) + '" target="_blank" rel="noopener nofollow">Website</a>';
     if (slug) actions += '<a class="btn" href="/venues/' + esc(slug) + '/">Details</a>';
+    if (COORDS[v.n]) actions += '<button type="button" class="btn quiet showmap" data-i="' + i + '">Show on map</button>';
     if (v.p) actions += '<a class="btn quiet" href="tel:' + esc(v.p.replace(/[^0-9+]/g, "")) + '">Call</a>';
-    if (v.a) actions += '<a class="btn quiet" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Map</a>';
-    return '<article class="card t' + tIdx(v.t) + '">' +
+    if (v.a) actions += '<a class="btn quiet" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Directions</a>';
+    return '<article class="card t' + tIdx(v.t) + '" data-i="' + i + '">' +
       '<div class="card-top"><div class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>' + badges + '</div>' +
       '<h3>' + title + '</h3>' +
       '<div class="loc">' + esc(v.c) + (v.c === "Mobile" || v.c === "Unknown" ? "" : ", VA") + '</div>' +
@@ -192,28 +266,130 @@
       '</article>';
   }
 
+  /* ---------- type chips (pick any number) ---------- */
   function renderChips() {
     var counts = {};
     V.forEach(function (v) { if (matches(v, true)) counts[v.t] = (counts[v.t] || 0) + 1; });
     var total = Object.keys(counts).reduce(function (a, k) { return a + counts[k]; }, 0);
-    var h = '<button type="button" class="chip" data-t="" aria-pressed="' + (curType === "") + '">All types <span class="n">' + total + '</span></button>';
+    var h = '<button type="button" class="chip" data-t="" aria-pressed="' + (curTypes.length === 0) + '">All types <span class="n">' + total + '</span></button>';
     TYPES.forEach(function (t) {
-      var n = counts[t] || 0;
-      h += '<button type="button" class="chip t' + tIdx(t) + '" data-t="' + esc(t) + '" aria-pressed="' + (curType === t) + '"' + (n === 0 && curType !== t ? " disabled" : "") + '><span class="dot"></span>' + esc(typeLabel(t)) + ' <span class="n">' + n + '</span></button>';
+      var n = counts[t] || 0, on = curTypes.indexOf(t) > -1;
+      h += '<button type="button" class="chip t' + tIdx(t) + '" data-t="' + esc(t) + '" aria-pressed="' + on + '"' + (n === 0 && !on ? " disabled" : "") + '><span class="dot"></span>' + esc(typeLabel(t)) + ' <span class="n">' + n + '</span></button>';
     });
     $("chips").innerHTML = h;
   }
   $("chips").addEventListener("click", function (e) {
     var b = e.target.closest ? e.target.closest(".chip") : null;
     if (!b || b.disabled) return;
-    curType = b.getAttribute("data-t");
+    var t = b.getAttribute("data-t");
+    if (t === "") curTypes = [];
+    else { var i = curTypes.indexOf(t); if (i > -1) curTypes.splice(i, 1); else curTypes.push(t); }
     render();
   });
 
+  /* ---------- map ---------- */
+  var mq = window.matchMedia("(min-width: 900px)");
+  var view = store("nvpv-view") || (mq.matches ? "side" : "list");
+  var mapObj = null, layer = null, markers = {}, loading = false, queued = [];
+
+  function effView() {
+    if (!HAVE_MAP) return "list";
+    if (!mq.matches && view === "side") return "list";
+    return view;
+  }
+  function popup(v) {
+    var slug = (window.SLUGS || {})[v.n];
+    return '<div class="pop t' + tIdx(v.t) + '"><div class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>' +
+      '<strong>' + (slug ? '<a href="/venues/' + esc(slug) + '/">' + esc(v.n) + '</a>' : esc(v.n)) + '</strong>' +
+      '<div>' + esc(v.c) + ', VA</div>' +
+      '<div class="pp">' + (v.pr != null ? "From " + money(v.pr) : "Price not published") + '</div>' +
+      '<div class="pl">' + (slug ? '<a href="/venues/' + esc(slug) + '/">Details</a>' : "") +
+      (v.a ? '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Directions</a>' : "") + '</div></div>';
+  }
+  function initMap() {
+    mapObj = L.map("map").setView([38.93, -77.4], 10);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(mapObj);
+    layer = L.layerGroup().addTo(mapObj);
+  }
+  function ensureMap(cb) {
+    if (mapObj) { cb(); return; }
+    if (window.L) { initMap(); cb(); return; }
+    queued.push(cb);
+    if (loading) return;
+    loading = true;
+    var css = document.createElement("link");
+    css.rel = "stylesheet"; css.href = LEAFLET + "leaflet.min.css";
+    document.head.appendChild(css);
+    var sc = document.createElement("script");
+    sc.src = LEAFLET + "leaflet.min.js";
+    sc.onload = function () { initMap(); queued.splice(0).forEach(function (f) { f(); }); };
+    sc.onerror = function () { loading = false; queued = []; $("mapnote").textContent = "The map could not load. Check your connection and switch views to retry."; };
+    document.head.appendChild(sc);
+  }
+  function updateMap(list) {
+    if (!mapObj) return;
+    mapObj.invalidateSize();
+    layer.clearLayers(); markers = {};
+    var pts = [], missing = 0;
+    list.forEach(function (v) {
+      var c = COORDS[v.n];
+      if (!c) { missing++; return; }
+      var m = L.marker(c, {
+        icon: L.divIcon({ className: "pin-wrap", html: '<span class="pin t' + tIdx(v.t) + '"></span>', iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -12] }),
+        title: v.n, riseOnHover: true
+      });
+      m.bindPopup(popup(v), { maxWidth: 260 });
+      m.addTo(layer);
+      markers[v.n] = m; pts.push(c);
+    });
+    if (pts.length) mapObj.fitBounds(pts, { padding: [36, 36], maxZoom: 14 });
+    $("mapnote").textContent = list.length === 0 ? "No venues match your filters" :
+      pts.length + " of " + list.length + " venues on the map" + (missing ? " (the rest have no fixed location)" : "");
+  }
+  function applyView() {
+    var ev = effView();
+    $("rwrap").setAttribute("data-view", ev);
+    $("seg").hidden = !HAVE_MAP;
+    [].slice.call($("seg").querySelectorAll("button")).forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === ev)); });
+    if (ev !== "list") ensureMap(function () { updateMap(curList); });
+  }
+  $("seg").addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("button") : null;
+    if (!b) return;
+    view = b.getAttribute("data-v"); store("nvpv-view", view);
+    applyView();
+  });
+  if (mq.addEventListener) mq.addEventListener("change", applyView);
+
+  function setHl(el, on) {
+    var i = el && el.getAttribute("data-i"); var v = i != null ? curList[+i] : null;
+    var m = v && markers[v.n]; if (!m) return;
+    var node = m.getElement && m.getElement();
+    if (node) node.classList.toggle("hl", on);
+    m.setZIndexOffset(on ? 1000 : 0);
+  }
+  $("results").addEventListener("mouseover", function (e) { var c = e.target.closest && e.target.closest(".card"); if (c) setHl(c, true); });
+  $("results").addEventListener("mouseout", function (e) { var c = e.target.closest && e.target.closest(".card"); if (c) setHl(c, false); });
+  $("results").addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".showmap");
+    if (!b) return;
+    var v = curList[+b.getAttribute("data-i")], m = v && markers[v.n];
+    if (!m || !mapObj) return;
+    mapObj.setView(m.getLatLng(), Math.max(mapObj.getZoom(), 14));
+    m.openPopup();
+    if (!mq.matches) $("mapbox").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
+  /* ---------- render ---------- */
   function render() {
     var list = sortList(V.filter(function (v) { return matches(v, false); }));
-    var active = ALL_FIELDS.some(function (id) { return $(id).value !== ""; }) || $("pricedOnly").checked || curType !== "";
-    var moreActive = MORE.filter(function (id) { return $(id).value !== ""; }).length + ($("pricedOnly").checked ? 1 : 0);
+    curList = list;
+    var selFilters = Object.keys(F).filter(function (k) { return F[k].length; }).length;
+    var active = selFilters > 0 || curTypes.length > 0 || $("q").value !== "" || $("guests").value !== "" || $("age").value !== "" || $("pricedOnly").checked;
+    var moreActive = ["setting", "price", "food", "catering"].filter(function (k) { return F[k].length; }).length + ($("pricedOnly").checked ? 1 : 0);
     $("moreBtn").textContent = "More filters" + (moreActive ? " (" + moreActive + ")" : "");
     $("reset").hidden = !active;
     $("count").textContent = list.length + (list.length === 1 ? " venue" : " venues") + (active ? " match" : "");
@@ -221,8 +397,10 @@
     $("results").innerHTML = list.length ? list.map(card).join("") :
       '<div class="empty"><b>No venues match those filters</b><p>Try a different city, a larger price range, or fewer filters.</p><button class="btn primary" type="button" id="emptyReset">Clear all filters</button></div>';
     var er = $("emptyReset"); if (er) er.addEventListener("click", clearAll);
+    if (effView() !== "list") ensureMap(function () { updateMap(curList); });
   }
   render();
+  applyView();
 })();
 </script>
 </body>

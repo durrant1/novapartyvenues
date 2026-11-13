@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Venue location finder (internal)</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 760px; margin: 24px auto; padding: 0 16px; color: #161a33; }
+  button { font: inherit; font-weight: 700; padding: 10px 18px; border-radius: 999px; border: 0; background: #d6333b; color: #fff; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  progress { width: 100%; height: 14px; }
+  textarea { width: 100%; height: 240px; font: 12px/1.4 ui-monospace, monospace; }
+  .fail { color: #9a1c22; }
+  #log { max-height: 180px; overflow: auto; font-size: .9rem; background: #f6f7fb; padding: 8px 12px; border-radius: 8px; }
+</style>
+</head>
+<body>
+<h1>Venue location finder</h1>
+<p>One-time internal tool. It looks up a map location for each venue address (about 2 minutes, one lookup per second) and produces the text for <code>coords.js</code>. Keep this tab open until it finishes.</p>
+<p><button id="go">Start</button></p>
+<progress id="bar" value="0" max="1" hidden></progress>
+<p id="status"></p>
+<div id="log" hidden></div>
+<div id="out" hidden>
+  <h2>Result</h2>
+  <p>Copy everything in the box below and paste it into the chat.</p>
+  <p><button id="copy">Copy result</button> <span id="copied"></span></p>
+  <textarea id="txt" readonly></textarea>
+  <h2>Not found</h2>
+  <p id="fails" class="fail"></p>
+</div>
+<script src="/data.js"></script>
+<script>
+(function () {
+  var V = (window.VENUES || []).filter(function (v) { return v.a; });
+  var $ = function (id) { return document.getElementById(id); };
+  var coords = {}, fails = [];
+  var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  // Northern Virginia area: reject matches outside it.
+  function plausible(lat, lng) { return lat > 38.5 && lat < 39.3 && lng > -77.9 && lng < -76.8; }
+
+  async function look(q) {
+    var url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&viewbox=-77.9,39.3,-76.8,38.5&q=" + encodeURIComponent(q);
+    var r = await fetch(url, { headers: { "Accept": "application/json" } });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    var j = await r.json();
+    if (!j.length) return null;
+    var lat = parseFloat(j[0].lat), lng = parseFloat(j[0].lon);
+    return plausible(lat, lng) ? [Math.round(lat * 1e5) / 1e5, Math.round(lng * 1e5) / 1e5] : null;
+  }
+  async function find(v) {
+    var tries = [v.a, v.a.replace(/,?\s*(Suite|Ste|Unit|#)\s*[\w-]+/i, ""), v.n + ", " + v.c + ", VA", v.a.replace(/\s*\d{5}(-\d{4})?$/, "")];
+    var seen = {};
+    for (var i = 0; i < tries.length; i++) {
+      if (seen[tries[i]]) continue; seen[tries[i]] = 1;
+      var hit = await look(tries[i]);
+      await sleep(1100);
+      if (hit) return hit;
+    }
+    return null;
+  }
+  $("go").addEventListener("click", async function () {
+    $("go").disabled = true; $("bar").hidden = false; $("log").hidden = false; $("bar").max = V.length;
+    for (var i = 0; i < V.length; i++) {
+      var v = V[i];
+      $("status").textContent = "Looking up " + (i + 1) + " of " + V.length + ": " + v.n;
+      try {
+        var c = await find(v);
+        if (c) coords[v.n] = c; else fails.push(v.n + " (" + v.a + ")");
+      } catch (e) { fails.push(v.n + " (error: " + e.message + ")"); await sleep(3000); }
+      $("bar").value = i + 1;
+      $("log").innerHTML += (coords[v.n] ? "" : '<div class="fail">') + (i + 1) + ". " + v.n + (coords[v.n] ? ": ok" : ": not found</div>") + (coords[v.n] ? "<br>" : "");
+      $("log").scrollTop = 1e9;
+    }
+    var lines = Object.keys(coords).map(function (k) { return "  " + JSON.stringify(k) + ": [" + coords[k][0] + ", " + coords[k][1] + "]"; });
+    $("txt").value = "// Map locations for each venue (latitude, longitude). Keyed by venue name.\nwindow.COORDS = {\n" + lines.join(",\n") + "\n};\n";
+    $("fails").textContent = fails.length ? fails.join("; ") : "None. Every venue was located.";
+    $("out").hidden = false;
+    $("status").textContent = "Done. " + Object.keys(coords).length + " of " + V.length + " located.";
+  });
+  $("copy").addEventListener("click", function () {
+    $("txt").select();
+    try { document.execCommand("copy"); $("copied").textContent = "Copied"; } catch (e) { $("copied").textContent = "Press Ctrl+C (or Cmd+C) to copy"; }
+  });
+})();
+</script>
+</body>
+</html>
