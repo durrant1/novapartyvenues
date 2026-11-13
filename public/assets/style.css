@@ -215,3 +215,25 @@ ul.plain li { padding: 8px 0; border-bottom: 1px solid var(--line); break-inside
 .pop .pl { display: flex; gap: 14px; font-weight: 600; font-size: .9rem; }
 .leaflet-container { font-family: var(--body); }
 @media (max-width: 480px) { .site-bar nav a:first-child { display: none; } }
+
+/* favorites star */
+.fav { position: absolute; top: 10px; right: 10px; z-index: 3; width: 40px; height: 40px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; padding: 0; }
+.fav:hover { background: var(--soft); color: var(--ink); }
+.fav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.fav[aria-pressed=true] { color: #e0a100; }
+.fav[aria-pressed=true] svg { fill: #ffc83d; stroke: #b07d00; }
+.card .card-top { padding-right: 40px; }
+.vhead { position: relative; padding-right: 52px; }
+.vhead .fav { top: 2px; right: 0; width: 46px; height: 46px; border: 1.5px solid var(--line); background: var(--card); }
+.vhead .fav svg { width: 28px; height: 28px; }
+.seg-btn { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-weight: 700; font-size: .88rem; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; }
+.seg-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+.seg-btn[aria-pressed=true] { background: var(--ink); color: var(--bg); }
+.seg-btn[aria-pressed=true] svg { fill: #ffc83d; stroke: #ffc83d; }
+
+/* applied filter pills (shown when "More filters" is collapsed) */
+.applied { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.applied[hidden] { display: none; }
+.pill { display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: .86rem; font-weight: 600; padding: 5px 8px 5px 12px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--soft); color: var(--ink); cursor: pointer; }
+.pill:hover { background: var(--line); }
+.pill b { font-weight: 800; font-size: 1.1rem; line-height: 1; }

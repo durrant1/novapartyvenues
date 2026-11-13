@@ -40,6 +40,7 @@
       <button class="morebtn" id="moreBtn" type="button" aria-expanded="false" aria-controls="more">More filters</button>
       <button class="linkbtn" id="reset" type="button" hidden>Clear all filters</button>
     </div>
+    <div class="applied" id="applied" aria-label="Filters applied in the hidden section" hidden></div>
     <div class="more" id="more" hidden>
       <div class="field"><span class="lbl" id="setting-l">Indoor or outdoor</span><div class="ms" id="setting"></div></div>
       <div class="field"><span class="lbl" id="price-l">Starting price</span><div class="ms" id="price"></div></div>
@@ -56,6 +57,7 @@
     <div class="bar">
       <div class="count" id="count" aria-live="polite"></div>
       <div class="bar-right">
+        <button type="button" class="seg-btn" id="favBtn" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.6l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9z"/></svg><span id="favLbl">Saved</span></button>
         <div class="seg" id="seg" role="group" aria-label="Results view" hidden>
           <button type="button" data-v="list" aria-pressed="false">List</button>
           <button type="button" data-v="side" aria-pressed="false">List and map</button>
@@ -87,6 +89,7 @@
 </div></footer>
 <!-- BROWSE:END -->
 
+<script src="/assets/fav.js"></script>
 <script src="/data.js"></script>
 <script src="/assets/slugs.js"></script>
 <script src="/coords.js"></script>
@@ -100,6 +103,8 @@
   var F = { city: [], setting: [], price: [], food: [], catering: [] };   // multi-select values (OR within a filter, AND across filters)
   var curTypes = [];
   var curList = [];
+  var showFav = false;
+  var FAVS = window.FAVS || { has: function () { return false; }, count: function () { return 0; }, toggle: function () {}, paint: function () {} };
 
   // Numeric age bounds from labels like "5-12", "4+", "All ages". Unknown = null (never excluded).
   V.forEach(function (v) {
@@ -161,6 +166,7 @@
     MS[id] = {
       close: function () { close(false); },
       contains: function (n) { return root.contains(n); },
+      text: function () { return F[id].map(function (v) { return labels[v]; }).join(", "); },
       clear: function () { F[id] = []; [].slice.call(panel.querySelectorAll("input")).forEach(function (i) { i.checked = false; }); sync(); }
     };
     sync();
@@ -184,12 +190,21 @@
     var open = $("more").hidden;
     $("more").hidden = !open;
     $("moreBtn").setAttribute("aria-expanded", String(open));
+    paintMore();
+  });
+  $("favBtn").addEventListener("click", function () { showFav = !showFav; render(); });
+  document.addEventListener("favchange", function () { if (showFav) render(); else paintMore(); });
+  $("applied").addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".pill"); if (!b) return;
+    var k = b.getAttribute("data-k");
+    if (k === "pricedOnly") $("pricedOnly").checked = false; else MS[k].clear();
+    render();
   });
   function clearAll() {
     ["q", "guests", "age"].forEach(function (id) { $(id).value = ""; });
     $("pricedOnly").checked = false;
     Object.keys(MS).forEach(function (k) { MS[k].clear(); });
-    curTypes = [];
+    curTypes = []; showFav = false;
     render();
   }
   $("reset").addEventListener("click", clearAll);
@@ -198,6 +213,7 @@
   function matches(v, skipType) {
     var q = $("q").value.trim().toLowerCase();
     if (q && (v.n + " " + v.t + " " + v.c + " " + (v.pn || "")).toLowerCase().indexOf(q) === -1) return false;
+    if (showFav && !FAVS.has(v.n)) return false;
     if (!skipType && curTypes.length && curTypes.indexOf(v.t) === -1) return false;
     if (F.city.length && F.city.indexOf(v.c) === -1) return false;
     // A venue that offers "Both" matches Indoor and Outdoor.
@@ -255,6 +271,7 @@
     if (v.p) actions += '<a class="btn quiet" href="tel:' + esc(v.p.replace(/[^0-9+]/g, "")) + '">Call</a>';
     if (v.a) actions += '<a class="btn quiet" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Directions</a>';
     return '<article class="card t' + tIdx(v.t) + '" data-i="' + i + '">' +
+      '<button type="button" class="fav" data-n="' + esc(v.n) + '" aria-pressed="false" aria-label="Save ' + esc(v.n) + ' to favorites"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.6l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9z"/></svg></button>' +
       '<div class="card-top"><div class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>' + badges + '</div>' +
       '<h3>' + title + '</h3>' +
       '<div class="loc">' + esc(v.c) + (v.c === "Mobile" || v.c === "Unknown" ? "" : ", VA") + '</div>' +
@@ -383,19 +400,37 @@
     if (!mq.matches) $("mapbox").scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
 
+  function paintMore() {
+    var moreActive = ["setting", "price", "food", "catering"].filter(function (k) { return F[k].length; }).length + ($("pricedOnly").checked ? 1 : 0);
+    var expanded = !$("more").hidden;
+    $("moreBtn").textContent = (expanded ? "Fewer filters" : "More filters") + (moreActive ? " (" + moreActive + ")" : "");
+    var pills = [];
+    if (!expanded) {
+      [["setting", "Setting"], ["price", "Price"], ["food", "Food"], ["catering", "Outside food"]].forEach(function (p) {
+        if (F[p[0]].length) pills.push('<button type="button" class="pill" data-k="' + p[0] + '" aria-label="Remove filter ' + p[1] + ': ' + esc(MS[p[0]].text()) + '">' + p[1] + ": " + esc(MS[p[0]].text()) + ' <b aria-hidden="true">&times;</b></button>');
+      });
+      if ($("pricedOnly").checked) pills.push('<button type="button" class="pill" data-k="pricedOnly" aria-label="Remove filter: listed price only">Listed price only <b aria-hidden="true">&times;</b></button>');
+    }
+    $("applied").innerHTML = pills.join("");
+    $("applied").hidden = pills.length === 0;
+    var nf = FAVS.count();
+    $("favLbl").textContent = "Saved" + (nf ? " (" + nf + ")" : "");
+    $("favBtn").setAttribute("aria-pressed", String(showFav));
+  }
+
   /* ---------- render ---------- */
   function render() {
     var list = sortList(V.filter(function (v) { return matches(v, false); }));
     curList = list;
     var selFilters = Object.keys(F).filter(function (k) { return F[k].length; }).length;
-    var active = selFilters > 0 || curTypes.length > 0 || $("q").value !== "" || $("guests").value !== "" || $("age").value !== "" || $("pricedOnly").checked;
-    var moreActive = ["setting", "price", "food", "catering"].filter(function (k) { return F[k].length; }).length + ($("pricedOnly").checked ? 1 : 0);
-    $("moreBtn").textContent = "More filters" + (moreActive ? " (" + moreActive + ")" : "");
+    var active = showFav || selFilters > 0 || curTypes.length > 0 || $("q").value !== "" || $("guests").value !== "" || $("age").value !== "" || $("pricedOnly").checked;
+    paintMore();
     $("reset").hidden = !active;
     $("count").textContent = list.length + (list.length === 1 ? " venue" : " venues") + (active ? " match" : "");
     renderChips();
     $("results").innerHTML = list.length ? list.map(card).join("") :
-      '<div class="empty"><b>No venues match those filters</b><p>Try a different city, a larger price range, or fewer filters.</p><button class="btn primary" type="button" id="emptyReset">Clear all filters</button></div>';
+      (showFav && FAVS.count() === 0 ? '<div class="empty"><b>No saved venues yet</b><p>Tap the star on any venue to save it here. Saved venues stay on this device.</p><button class="btn primary" type="button" id="emptyReset">Show all venues</button></div>' : '<div class="empty"><b>No venues match those filters</b><p>Try a different city, a larger price range, or fewer filters.</p><button class="btn primary" type="button" id="emptyReset">Clear all filters</button></div>');
+    FAVS.paint($("results"));
     var er = $("emptyReset"); if (er) er.addEventListener("click", clearAll);
     if (effView() !== "list") ensureMap(function () { updateMap(curList); });
   }

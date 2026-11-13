@@ -93,6 +93,8 @@ function write(rel, content) {
 /* ---------- shared pieces ---------- */
 const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400..700&display=swap">\n';
 const ICONS = '<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="icon" href="/favicon.ico" sizes="48x48">\n<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n';
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.6l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9z"/></svg>';
+const favBtn = (n) => '<button type="button" class="fav" data-n="' + esc(n) + '" aria-pressed="false" aria-label="Save ' + esc(n) + ' to favorites">' + STAR + '</button>';
 const LOGO = '<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="10" cy="11" r="7.5" fill="#d6333b"/><circle cx="20" cy="11" r="7.5" fill="#ffc83d" fill-opacity=".92"/><circle cx="15" cy="18.5" r="7.5" fill="#22a58a" fill-opacity=".92"/></svg>';
 const HEADER = '<header class="site-bar"><div class="bar-in"><a class="brand" href="/">' + LOGO + BRAND + '</a><nav aria-label="Main"><a href="/">Search venues</a><a href="/venues/">All venues</a></nav></div></header>';
 
@@ -121,7 +123,7 @@ function layout(o) {
     '<meta property="og:url" content="' + url + '">\n' +
     ICONS + FONTS + '<link rel="stylesheet" href="/assets/style.css">\n' + ld + '\n</head>\n<body>\n' +
     HEADER + '\n' +
-    '<main class="page">\n' + o.body + '\n</main>\n' + footer() + '\n</body>\n</html>\n';
+    '<main class="page">\n' + o.body + '\n</main>\n' + footer() + '\n<script src="/assets/fav.js" defer></script>\n</body>\n</html>\n';
 }
 
 function crumbs(items) {
@@ -140,7 +142,7 @@ function itemList(list) {
 function card(v) {
   const guests = v.mn != null && v.mx != null ? v.mn + '-' + v.mx : v.mx != null ? 'Up to ' + v.mx : v.mn != null ? v.mn + '+' : 'Ask venue';
   const setting = v.s === 'Both' ? 'In & out' : v.s || 'Ask venue';
-  return '<article class="card t' + tIdx(v.t) + '">' +
+  return '<article class="card t' + tIdx(v.t) + '">' + favBtn(v.n) +
     '<div class="card-top"><div class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>' + (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') + '</div>' +
     '<h3><a href="' + venueUrl(v) + '">' + esc(v.n) + '</a></h3>' +
     '<div class="loc">' + esc(cityLine(v)) + '</div>' +
@@ -174,7 +176,7 @@ function venuePage(v) {
     (v.p ? '<a class="btn block" href="tel:' + esc(v.p.replace(/[^0-9+]/g, '')) + '">Call ' + esc(v.p) + '</a>' : '') +
     (v.a ? '<a class="btn block" href="https://www.google.com/maps/search/?api=1&amp;query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Get directions</a>' : '') +
     '<p class="small">Last reviewed ' + REVIEWED + '. Prices and policies change, so confirm with the venue before booking.</p></div></aside>';
-  const body = bc.html + '\n<div class="vtype t' + tIdx(v.t) + '"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>\n<h1>' + esc(v.n) + '</h1>\n' +
+  const body = bc.html + '\n<div class="vtype t' + tIdx(v.t) + '"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>\n<div class="vhead"><h1>' + esc(v.n) + '</h1>' + favBtn(v.n) + '</div>\n' +
     '<p class="lead">' + esc(cityLine(v)) + (v.m >= 3 ? ' <span class="badge rec">Recommended by neighbors</span>' : '') + '</p>\n' + flag +
     '<div class="vlayout"><div>\n' + statHtml + '\n' +
     (v.pn ? '<div class="pricebox"><p><strong>Pricing and details.</strong> ' + esc(v.pn) + '.</p></div>\n' : '') +
@@ -259,6 +261,7 @@ for (const t of types) write('types/' + slugify(t) + '/index.html', typePage(t))
 })();
 
 /* ---------- assets, sitemap, robots, 404 ---------- */
+write('assets/fav.js', fs.readFileSync(path.join(__dirname, 'fav.js'), 'utf8'));
 write('assets/style.css', fs.readFileSync(path.join(__dirname, 'style.css'), 'utf8'));
 
 const slugMap = {};
