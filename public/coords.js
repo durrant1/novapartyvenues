@@ -24,10 +24,7 @@ window.COORDS = {
   38.96618,
   -77.39678
  ],
- "Brown's Chapel (Reston Association)": [
-  38.9705,
-  -77.34304
- ],
+ "Brown's Chapel (Reston Association)": [38.97256, -77.34049],
  "Bull Run Park / Atlantis Waterpark": [
   38.80268,
   -77.47857
