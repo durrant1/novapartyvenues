@@ -95,5 +95,13 @@ window.COORDS = {
   "Wonder Childhood Discovery": [39.11574, -77.56531],
   "WorldGate Athletic Club & Spa": [38.95788, -77.39994],
   "ZavaZone Sterling": [39.00945, -77.4188],
-  "The WaterMine": [38.96116, -77.31865]
+  "The WaterMine": [38.96116, -77.31865],
+  "Cake Time DIY": [38.88674, -77.44067],
+  "Hal & Berni Hanson Regional Park": [38.97182, -77.54898],
+  "KidCreate Studio Ashburn": [39.04086, -77.52191],
+  "Mehfil Restaurant and Bar": [39.0364, -77.40797],
+  "Monster Mini Golf Chantilly": [38.89461, -77.43985],
+  "Party a la Kart": [39.04494, -77.45182],
+  "Play N Learn Chantilly": [38.8915, -77.44576],
+  "Vertical Rock Indoor Climbing (Tysons)": [38.92454, -77.24029]
 };
