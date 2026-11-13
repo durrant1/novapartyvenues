@@ -280,3 +280,6 @@ ul.plain li { padding: 9px 0; border-bottom: 1px solid var(--line); break-inside
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .rv { opacity: 1; transform: none; }
 }
+.pop { position: relative; padding-right: 44px; }
+.pop .fav { top: -6px; right: -8px; width: 38px; height: 38px; background: #f1ede3; }
+.leaflet-popup-content-wrapper { border-radius: 18px; }

@@ -326,9 +326,13 @@
     if (!mq.matches && view === "side") return "list";
     return view;
   }
+  function favBtnHtml(n) {
+    var on = FAVS.has(n);
+    return '<button type="button" class="fav" data-n="' + esc(n) + '" aria-pressed="' + on + '" aria-label="' + (on ? "Remove " : "Save ") + esc(n) + (on ? " from favorites" : " to favorites") + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.6l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9z"/></svg></button>';
+  }
   function popup(v) {
     var slug = (window.SLUGS || {})[v.n];
-    return '<div class="pop t' + tIdx(v.t) + '"><span class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</span>' +
+    return '<div class="pop t' + tIdx(v.t) + '">' + favBtnHtml(v.n) + '<span class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</span>' +
       '<strong>' + (slug ? '<a href="/venues/' + esc(slug) + '/">' + esc(v.n) + '</a>' : esc(v.n)) + '</strong>' +
       '<div>' + esc(v.c) + ', VA</div>' +
       '<div class="pp">' + (v.pr != null ? "From " + money(v.pr) : "Price not published") + '</div>' +
@@ -369,7 +373,7 @@
   }
   function refreshPins() {
     if (!mapObj) return;
-    curList.forEach(function (v) { var m = markers[v.n]; if (m) m.setIcon(pinIcon(v)); });
+    curList.forEach(function (v) { var m = markers[v.n]; if (m) { m.setIcon(pinIcon(v)); m.setZIndexOffset(FAVS.has(v.n) ? 10000 : 0); } });
   }
   function updateMap(list, fit) {
     if (!mapObj) return;
@@ -385,6 +389,7 @@
         title: v.n, riseOnHover: true
       });
       m.bindPopup(popup(v), { maxWidth: 260 });
+      m.setZIndexOffset(FAVS.has(v.n) ? 10000 : 0);
       m.addTo(layer);
       markers[v.n] = m; pts.push(c);
     });
@@ -413,7 +418,7 @@
     var m = v && markers[v.n]; if (!m) return;
     var node = m.getElement && m.getElement();
     if (node) node.classList.toggle("hl", on);
-    m.setZIndexOffset(on ? 1000 : 0);
+    m.setZIndexOffset(on ? 20000 : (FAVS.has(v.n) ? 10000 : 0));
   }
   $("results").addEventListener("mouseover", function (e) { var c = e.target.closest && e.target.closest(".card"); if (c) setHl(c, true); });
   $("results").addEventListener("mouseout", function (e) { var c = e.target.closest && e.target.closest(".card"); if (c) setHl(c, false); });
