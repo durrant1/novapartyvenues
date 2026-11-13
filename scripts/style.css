@@ -106,6 +106,9 @@ input:focus, select:focus { border-color: var(--orange); box-shadow: 0 0 0 4px r
 .seg-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
 .seg-btn[aria-pressed=true] { background: var(--ink); color: var(--bg); }
 .seg-btn[aria-pressed=true] svg { fill: var(--sun); stroke: var(--sun); }
+.seg-btn.has-favs svg { fill: #ffc24b; stroke: #14161f; }
+.seg-btn.has-favs[aria-pressed=true] svg { stroke: var(--sun); }
+.seg-btn.has-favs { border-color: #e0a21f; }
 .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 
 /* cards: a color block on top, facts below */
