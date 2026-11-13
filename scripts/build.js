@@ -43,6 +43,8 @@ const rank = (a, b) => (b.m || 0) - (a.m || 0) || a.n.localeCompare(b.n);
 const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
 const joinList = (a) => (a.length <= 1 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
 
+const ALLTYPES = Array.from(new Set(ALL.map((v) => v.t))).sort();
+const tIdx = (t) => ALLTYPES.indexOf(t) % 12;
 const cityLine = (v) => (v.c === 'Mobile' ? 'Mobile service' : v.c === 'Unknown' ? 'Virginia' : v.c + ', VA');
 const sizeText = (v) => (v.mn != null && v.mx != null ? v.mn + '-' + v.mx + ' guests' : v.mx != null ? 'Up to ' + v.mx + ' guests' : v.mn != null ? 'Minimum ' + v.mn + ' guests' : 'Ask the venue');
 const ageText = (v) => (v.age ? (v.age === 'All ages' ? 'All ages' : 'Ages ' + v.age) : 'Ask the venue');
@@ -89,15 +91,19 @@ function write(rel, content) {
 }
 
 /* ---------- shared pieces ---------- */
+const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400..700&display=swap">\n';
+const LOGO = '<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="10" cy="11" r="7.5" fill="#d6333b"/><circle cx="20" cy="11" r="7.5" fill="#ffc83d" fill-opacity=".92"/><circle cx="15" cy="18.5" r="7.5" fill="#22a58a" fill-opacity=".92"/></svg>';
+const HEADER = '<header class="site-bar"><div class="bar-in"><a class="brand" href="/">' + LOGO + BRAND + '</a><nav aria-label="Main"><a href="/">Search venues</a><a href="/venues/">All venues</a></nav></div></header>';
+
 function footer() {
-  const cl = cities.map((c) => '<a href="' + cityUrl(c) + '">' + esc(c) + '</a>').join(' &middot; ');
-  const tl = types.map((t) => '<a href="' + typeUrl(t) + '">' + esc(typeLabel(t)) + '</a>').join(' &middot; ');
-  return '<footer class="site-foot">\n' +
-    '<p><strong>Cities:</strong> ' + cl + '</p>\n' +
-    '<p><strong>Venue types:</strong> ' + tl + '</p>\n' +
-    (CONTACT ? '<p><strong>Own a venue?</strong> <a href="mailto:' + esc(CONTACT) + '">Claim or correct your listing</a>.</p>\n' : '') +
-    '<p>Prices and policies are gathered from venue websites, last reviewed ' + REVIEWED + ', and can change. "Starting price" is the lowest total package price we found, not a quote. Always confirm details and availability with the venue before booking.</p>\n' +
-    '</footer>';
+  const cl = cities.map((c) => '<li><a href="' + cityUrl(c) + '">' + esc(c) + '</a></li>').join('');
+  const tl = types.map((t) => '<li><a href="' + typeUrl(t) + '">' + esc(typeLabel(t)) + '</a></li>').join('');
+  return '<footer class="site-foot"><div class="foot-in">\n' +
+    '<div><h2>Browse by city</h2><ul>' + cl + '</ul></div>\n' +
+    '<div><h2>Browse by venue type</h2><ul>' + tl + '</ul></div>\n' +
+    (CONTACT ? '<p class="claim wide"><strong>Own a party venue?</strong> <a href="mailto:' + esc(CONTACT) + '">Claim or correct your listing</a> at ' + esc(CONTACT) + '.</p>\n' : '') +
+    '<p class="wide">Prices and policies are gathered from venue websites, last reviewed ' + REVIEWED + ', and can change. "Starting price" is the lowest total package price we found, not a quote. Always confirm details, availability and current pricing with the venue before booking. "Recommended by neighbors" counts how often a venue was suggested in a local parents\' group.</p>\n' +
+    '</div></footer>';
 }
 
 function layout(o) {
@@ -112,8 +118,8 @@ function layout(o) {
     '<meta property="og:type" content="website">\n<meta property="og:site_name" content="' + BRAND + '">\n' +
     '<meta property="og:title" content="' + esc(o.title) + '">\n<meta property="og:description" content="' + esc(o.desc) + '">\n' +
     '<meta property="og:url" content="' + url + '">\n' +
-    '<link rel="stylesheet" href="/assets/style.css">\n' + ld + '\n</head>\n<body>\n' +
-    '<header class="site-bar"><a class="brand" href="/">' + BRAND + '</a><nav><a href="/">Search venues</a><a href="/venues/">All venues</a></nav></header>\n' +
+    FONTS + '<link rel="stylesheet" href="/assets/style.css">\n' + ld + '\n</head>\n<body>\n' +
+    HEADER + '\n' +
     '<main class="page">\n' + o.body + '\n</main>\n' + footer() + '\n</body>\n</html>\n';
 }
 
@@ -131,13 +137,15 @@ function itemList(list) {
 }
 
 function card(v) {
-  return '<article class="card">' +
-    (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') +
+  const guests = v.mn != null && v.mx != null ? v.mn + '-' + v.mx : v.mx != null ? 'Up to ' + v.mx : v.mn != null ? v.mn + '+' : 'Ask venue';
+  const setting = v.s === 'Both' ? 'In & out' : v.s || 'Ask venue';
+  return '<article class="card t' + tIdx(v.t) + '">' +
+    '<div class="card-top"><div class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>' + (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') + '</div>' +
     '<h3><a href="' + venueUrl(v) + '">' + esc(v.n) + '</a></h3>' +
-    '<div class="meta">' + esc(typeLabel(v.t)) + ' &middot; ' + esc(cityLine(v)) + '</div>' +
-    '<div class="price">' + (v.pr != null ? 'From ' + money(v.pr) : '<span class="meta">Price not published</span>') + '</div>' +
-    '<div class="meta">' + esc(sizeText(v)) + ' &middot; ' + esc(ageText(v)) + ' &middot; ' + esc(v.s) + '</div>' +
-    (v.pn ? '<p class="meta">' + esc(v.pn) + '</p>' : '') + '</article>';
+    '<div class="loc">' + esc(cityLine(v)) + '</div>' +
+    (v.pr != null ? '<div class="price"><small>From</small> ' + money(v.pr) + '</div>' : '<div class="price none">Price not published</div>') +
+    '<div class="specs"><div><b>' + esc(guests) + '</b><span>Guests</span></div><div><b>' + esc(v.age || 'Ask venue') + '</b><span>Ages</span></div><div><b>' + esc(setting) + '</b><span>Setting</span></div></div>' +
+    (v.pn ? '<p class="note">' + esc(v.pn) + '</p>' : '') + '</article>';
 }
 const grid = (list) => '<div class="grid">' + list.map(card).join('\n') + '</div>';
 
@@ -152,21 +160,24 @@ function venuePage(v) {
   trail.push({ name: v.n, url: venueUrl(v) });
   const bc = crumbs(trail);
 
-  const rows = [['Starting price', priceText(v)], ['Party size', sizeText(v)], ['Ages', ageText(v)], ['Setting', v.s], ['Food', foodText(v)], ['Outside food', cateringText(v)]];
-  let facts = rows.map((r) => '<dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd>').join('');
-  if (v.a) facts += '<dt>Address</dt><dd><a href="https://www.google.com/maps/search/?api=1&amp;query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">' + esc(v.a) + '</a></dd>';
+  const guests = v.mn != null && v.mx != null ? v.mn + '-' + v.mx : v.mx != null ? 'Up to ' + v.mx : v.mn != null ? v.mn + '+' : 'Ask venue';
+  const stats = [[v.pr != null ? money(v.pr) : 'Not listed', 'Starting price'], [guests, 'Guests'], [v.age || 'Ask venue', 'Ages'], [v.s === 'Both' ? 'Indoor & outdoor' : v.s || 'Ask venue', 'Setting']];
+  const statHtml = '<div class="stats">' + stats.map((r) => '<div class="stat"><b>' + esc(r[0]) + '</b><span>' + r[1] + '</span></div>').join('') + '</div>';
+  let facts = '<dt>Food</dt><dd>' + esc(foodText(v)) + '</dd><dt>Outside food</dt><dd>' + esc(cateringText(v)) + '</dd>';
+  if (v.a) facts += '<dt>Address</dt><dd>' + esc(v.a) + '</dd>';
   if (v.p) facts += '<dt>Phone</dt><dd><a href="tel:' + esc(v.p.replace(/[^0-9+]/g, '')) + '">' + esc(v.p) + '</a></dd>';
-  if (v.w) facts += '<dt>Website</dt><dd><a href="' + esc(v.w) + '" target="_blank" rel="noopener nofollow">Official party information</a></dd>';
 
   const flag = v.fl ? '<p class="notice">Some details for this listing are unconfirmed. Please contact the venue directly before planning around it.</p>' : '';
-  const body = bc.html + '\n<h1>' + esc(v.n) + '</h1>\n' +
-    '<p class="lead">' + esc(typeLabel(v.t)) + ' &middot; ' + esc(cityLine(v)) + '</p>\n' +
-    (v.m >= 3 ? '<p><span class="badge rec">Recommended by neighbors</span> Suggested by several local parents.</p>\n' : '') + flag +
-    '<dl class="facts">' + facts + '</dl>\n' +
-    (v.pn ? '<h2>Pricing and details</h2>\n<p>' + esc(v.pn) + '.</p>\n' : '') +
-    '<div class="actions">' + (v.w ? '<a class="btn primary" href="' + esc(v.w) + '" target="_blank" rel="noopener nofollow">Visit venue website</a>' : '') +
-    (v.p ? '<a class="btn" href="tel:' + esc(v.p.replace(/[^0-9+]/g, '')) + '">Call</a>' : '') + '</div>\n' +
-    '<p class="small">Last reviewed ' + REVIEWED + '. Prices and policies change, so confirm with the venue before booking.</p>\n' +
+  const side = '<aside class="side"><div class="side-card"><h2>Plan your party</h2>' +
+    (v.w ? '<a class="btn primary block" href="' + esc(v.w) + '" target="_blank" rel="noopener nofollow">Visit venue website</a>' : '') +
+    (v.p ? '<a class="btn block" href="tel:' + esc(v.p.replace(/[^0-9+]/g, '')) + '">Call ' + esc(v.p) + '</a>' : '') +
+    (v.a ? '<a class="btn block" href="https://www.google.com/maps/search/?api=1&amp;query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Get directions</a>' : '') +
+    '<p class="small">Last reviewed ' + REVIEWED + '. Prices and policies change, so confirm with the venue before booking.</p></div></aside>';
+  const body = bc.html + '\n<div class="vtype t' + tIdx(v.t) + '"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>\n<h1>' + esc(v.n) + '</h1>\n' +
+    '<p class="lead">' + esc(cityLine(v)) + (v.m >= 3 ? ' <span class="badge rec">Recommended by neighbors</span>' : '') + '</p>\n' + flag +
+    '<div class="vlayout"><div>\n' + statHtml + '\n' +
+    (v.pn ? '<div class="pricebox"><p><strong>Pricing and details.</strong> ' + esc(v.pn) + '.</p></div>\n' : '') +
+    '<h2>Good to know</h2>\n<dl class="facts">' + facts + '</dl>\n</div>\n' + side + '</div>\n' +
     (sameCity.length ? '<h2>More venues in ' + esc(v.c) + '</h2>\n' + grid(sameCity) + '\n' : '') +
     (sameType.length ? '<h2>Similar venues: ' + esc(typeLabel(v.t)) + '</h2>\n' + grid(sameType) + '\n' : '') +
     '<p><a href="/">Search and filter all venues</a></p>';
@@ -209,7 +220,7 @@ function cityPage(c) {
   const intro = 'We’ve researched ' + plural(list.length, 'place') + ' to host a child’s birthday party in ' + c + ', Virginia. ' +
     'The most common types are ' + joinList(topCounts(list, 't', typeLabel, 3)) + '. ' + priceSentence(list) + ' ' + settingSentence(list);
   const bc = crumbs([{ name: 'Home', url: '/' }, { name: c, url: cityUrl(c) }]);
-  const others = cities.filter((x) => x !== c).map((x) => '<a href="' + cityUrl(x) + '">' + esc(x) + '</a>').join(' &middot; ');
+  const others = cities.filter((x) => x !== c).map((x) => '<li><a href="' + cityUrl(x) + '">' + esc(x) + '</a></li>').join('');
   const body = bc.html + '\n<h1>Kids’ Birthday Party Venues in ' + esc(c) + ', VA</h1>\n<p class="lead">' + esc(intro.replace(/\s+/g, ' ').trim()) + '</p>\n' +
     '<p><a href="/">Use the search page to filter by price, guest count, age and food policy.</a></p>\n' +
     '<h2>' + plural(list.length, 'venue') + ' in ' + esc(c) + '</h2>\n' + grid(list) + '\n<h2>Other cities</h2>\n<p>' + others + '</p>';
@@ -223,7 +234,7 @@ function typePage(t) {
   const intro = 'We’ve researched ' + plural(list.length, 'option') + ' in this category across Northern Virginia. ' +
     'Most are in ' + joinList(topCounts(list.filter((v) => v.c !== 'Unknown' && v.c !== 'Mobile'), 'c', (x) => x, 3)) + '. ' + priceSentence(list) + ' ' + settingSentence(list);
   const bc = crumbs([{ name: 'Home', url: '/' }, { name: label, url: typeUrl(t) }]);
-  const others = types.filter((x) => x !== t).map((x) => '<a href="' + typeUrl(x) + '">' + esc(typeLabel(x)) + '</a>').join(' &middot; ');
+  const others = types.filter((x) => x !== t).map((x) => '<li><a href="' + typeUrl(x) + '">' + esc(typeLabel(x)) + '</a></li>').join('');
   const body = bc.html + '\n<h1>' + esc(label) + ': Kids’ Birthday Party Venues in Northern Virginia</h1>\n<p class="lead">' + esc(intro.replace(/\s+/g, ' ').trim()) + '</p>\n' +
     '<p><a href="/">Use the search page to filter by city, price, guest count and age.</a></p>\n' +
     '<h2>' + plural(list.length, 'venue') + '</h2>\n' + grid(list) + '\n<h2>Other venue types</h2>\n<p>' + others + '</p>';
@@ -247,40 +258,7 @@ for (const t of types) write('types/' + slugify(t) + '/index.html', typePage(t))
 })();
 
 /* ---------- assets, sitemap, robots, 404 ---------- */
-write('assets/style.css', [
-  ':root{--bg:#fafaf7;--card:#fff;--ink:#1f2430;--muted:#667085;--line:#e4e4de;--brand:#c2410c;--brand-ink:#fff;--accent:#fff1e6;--warn:#fff4cc;--warn-ink:#7a5b00}',
-  '@media (prefers-color-scheme:dark){:root{--bg:#14161b;--card:#1c1f26;--ink:#eceef2;--muted:#9aa3b2;--line:#2b2f38;--brand:#ff8a4c;--brand-ink:#14161b;--accent:#2a2018;--warn:#3a3010;--warn-ink:#f1d77a}}',
-  '*{box-sizing:border-box}',
-  'body{margin:0;font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}',
-  'a{color:var(--brand)}',
-  '.site-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;background:var(--accent);border-bottom:1px solid var(--line)}',
-  '.brand{font-weight:800;text-decoration:none;color:var(--ink);font-size:1.1rem}',
-  '.site-bar nav{display:flex;gap:16px}',
-  '.site-bar nav a{color:var(--ink);text-decoration:none;font-weight:600;font-size:.95rem}',
-  '.page{max-width:1000px;margin:0 auto;padding:20px 16px 40px}',
-  'h1{font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.2;margin:.4em 0}',
-  'h2{font-size:1.25rem;margin:1.6em 0 .6em}',
-  '.crumbs{font-size:.85rem;color:var(--muted)}.crumbs a{color:var(--muted)}',
-  '.lead{color:var(--muted);max-width:760px}',
-  '.small,.meta{color:var(--muted);font-size:.88rem}',
-  '.facts{display:grid;grid-template-columns:max-content 1fr;gap:8px 18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0}',
-  '.facts dt{font-weight:600;color:var(--muted);font-size:.9rem}.facts dd{margin:0;overflow-wrap:anywhere}',
-  '@media (max-width:520px){.facts{grid-template-columns:1fr}.facts dt{margin-top:6px}}',
-  '.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}',
-  '.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px}',
-  '.card h3{margin:0;font-size:1.05rem}.card p{margin:0}',
-  '.price{font-weight:700}',
-  '.badge{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 8px;border-radius:6px;align-self:flex-start}',
-  '.badge.rec{background:var(--brand);color:var(--brand-ink)}',
-  '.notice{background:var(--warn);color:var(--warn-ink);padding:10px 14px;border-radius:8px}',
-  '.actions{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}',
-  '.btn{display:inline-block;padding:9px 14px;border-radius:8px;text-decoration:none;font-weight:600;border:1px solid var(--brand);color:var(--brand)}',
-  '.btn.primary{background:var(--brand);color:var(--brand-ink)}',
-  'ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:6px 0;border-bottom:1px solid var(--line)}',
-  '.site-foot{max-width:1000px;margin:0 auto;padding:24px 16px 40px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line)}',
-  'a:focus-visible,.btn:focus-visible{outline:2px solid #1c7ed6;outline-offset:2px}',
-  ''
-].join('\n'));
+write('assets/style.css', fs.readFileSync(path.join(__dirname, 'style.css'), 'utf8'));
 
 const slugMap = {};
 for (const v of LIVE) slugMap[v.n] = v.slug;
@@ -299,10 +277,7 @@ write('404.html', layout({ title: 'Page not found | ' + BRAND, desc: 'This page 
   const html = fs.readFileSync(f, 'utf8');
   const a = '<!-- BROWSE:START -->', b = '<!-- BROWSE:END -->';
   if (!html.includes(a) || !html.includes(b)) { console.warn('index.html has no BROWSE markers; skipped'); return; }
-  const block = a + '\n<section class="browse"><h2>Browse by city</h2><p>' +
-    cities.map((c) => '<a href="' + cityUrl(c) + '">' + esc(c) + ' (' + byCity[c].length + ')</a>').join(' &middot; ') +
-    '</p><h2>Browse by venue type</h2><p>' + types.map((t) => '<a href="' + typeUrl(t) + '">' + esc(typeLabel(t)) + ' (' + byType[t].length + ')</a>').join(' &middot; ') +
-    '</p><p><a href="/venues/">See every venue in one list</a></p></section>\n' + b;
+  const block = a + '\n' + footer() + '\n' + b;
   fs.writeFileSync(f, html.slice(0, html.indexOf(a)) + block + html.slice(html.indexOf(b) + b.length));
 })();
 

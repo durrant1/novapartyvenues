@@ -11,140 +11,57 @@
 <meta property="og:title" content="NoVA Party Venues | Kids' Birthday Party Venues in Northern Virginia">
 <meta property="og:description" content="Compare kids' birthday party venues across Northern Virginia by type, city, guest count, age, price and food policy.">
 <meta property="og:url" content="https://novapartyvenues.com/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400..700&display=swap">
+<link rel="stylesheet" href="/assets/style.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"NoVA Party Venues","url":"https://novapartyvenues.com/"}</script>
-<style>
-  :root {
-    --bg: #fafaf7; --card: #ffffff; --ink: #1f2430; --muted: #667085; --line: #e4e4de;
-    --brand: #c2410c; --brand-ink: #ffffff; --accent: #fff1e6; --focus: #1c7ed6; --warn: #fff4cc; --warn-ink: #7a5b00;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #14161b; --card: #1c1f26; --ink: #eceef2; --muted: #9aa3b2; --line: #2b2f38; --brand: #ff8a4c; --brand-ink: #14161b; --accent: #2a2018; --warn: #3a3010; --warn-ink: #f1d77a; }
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
-  a { color: inherit; }
-  header.site { padding: 28px 16px 20px; text-align: center; background: var(--accent); border-bottom: 1px solid var(--line); }
-  header.site h1 { margin: 0 0 6px; font-size: clamp(1.5rem, 4vw, 2.2rem); }
-  header.site p { margin: 0 auto; max-width: 640px; color: var(--muted); }
-  .wrap { max-width: 1150px; margin: 0 auto; padding: 16px; display: grid; gap: 20px; grid-template-columns: 1fr; }
-  @media (min-width: 860px) { .wrap { grid-template-columns: 270px 1fr; align-items: start; } aside.filters { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; } }
-  aside.filters { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-  aside.filters h2 { margin: 0 0 12px; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; }
-  .field { margin-bottom: 13px; }
-  .lbl { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 4px; }
-  .hint { font-size: .75rem; color: var(--muted); margin-top: 3px; }
-  input[type=search], input[type=number], select {
-    width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit;
-  }
-  input:focus, select:focus, button:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .check { display: flex; gap: 8px; align-items: center; font-size: .9rem; }
-  button.link { background: none; border: 0; color: var(--brand); cursor: pointer; font: inherit; font-size: .85rem; padding: 0; }
-  .bar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .bar .count { color: var(--muted); }
-  .bar select { width: auto; }
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-  .card h3 { margin: 0; font-size: 1.05rem; }
-  .meta { color: var(--muted); font-size: .88rem; }
-  .price { font-weight: 700; }
-  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
-  .tag { font-size: .75rem; padding: 2px 8px; border-radius: 999px; background: var(--accent); }
-  .badge { font-size: .7rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; }
-  .badge.rec { background: var(--brand); color: var(--brand-ink); }
-  .badge.warn { background: var(--warn); color: var(--warn-ink); }
-  .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-  .actions { margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px; }
-  .btn { display: inline-block; text-align: center; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: .9rem; border: 1px solid var(--brand); }
-  .btn.primary { background: var(--brand); color: var(--brand-ink); }
-  .btn.ghost { color: var(--brand); }
-  .empty { padding: 32px; text-align: center; color: var(--muted); background: var(--card); border: 1px dashed var(--line); border-radius: 12px; grid-column: 1 / -1; }
-  footer { max-width: 1150px; margin: 0 auto; padding: 24px 16px 40px; color: var(--muted); font-size: .88rem; }
-  footer .owner { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
-  .browse { max-width: 1150px; margin: 0 auto; padding: 8px 16px 0; }
-  .browse h2 { font-size: 1.05rem; margin: 18px 0 6px; }
-  .browse a { color: var(--brand); }
-</style>
 </head>
 <body>
-<header class="site">
-  <h1>NoVA Party Venues</h1>
-  <p>Compare kids' birthday party venues across Northern Virginia. Filter by type, city, guests, age, price and food rules.</p>
-</header>
+<header class="site-bar"><div class="bar-in"><a class="brand" href="/"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="10" cy="11" r="7.5" fill="#d6333b"/><circle cx="20" cy="11" r="7.5" fill="#ffc83d" fill-opacity=".92"/><circle cx="15" cy="18.5" r="7.5" fill="#22a58a" fill-opacity=".92"/></svg>NoVA Party Venues</a><nav aria-label="Main"><a href="/">Search venues</a><a href="/venues/">All venues</a></nav></div></header>
 
-<div class="wrap">
-  <aside class="filters" aria-label="Filters">
-    <h2>Filters <button class="link" id="reset" type="button">Reset</button></h2>
+<section class="hero"><div class="hero-in">
+  <h1>Find the right place for your kid's birthday party</h1>
+  <p>Compare Northern Virginia venues by price, party size, age and food rules, all in one place.</p>
+</div></section>
 
-    <div class="field">
-      <label class="lbl" for="q">Search</label>
-      <input type="search" id="q" placeholder="Name, city or keyword">
+<div class="shell">
+  <form class="panel" id="panel" role="search" aria-label="Filter venues" onsubmit="return false">
+    <div class="pf">
+      <div class="field wide"><label for="q">Search</label><input type="search" id="q" placeholder="Venue name or keyword"></div>
+      <div class="field wide"><label for="city">City</label><select id="city"><option value="">All cities</option></select></div>
+      <div class="field"><label for="guests">Guests</label><input type="number" id="guests" min="1" inputmode="numeric" placeholder="e.g. 20"></div>
+      <div class="field"><label for="age">Child's age</label><input type="number" id="age" min="0" max="17" inputmode="numeric" placeholder="e.g. 6"></div>
     </div>
-    <div class="field">
-      <label class="lbl" for="type">Venue type</label>
-      <select id="type"><option value="">All types</option></select>
+    <div class="panel-foot">
+      <button class="morebtn" id="moreBtn" type="button" aria-expanded="false" aria-controls="more">More filters</button>
+      <button class="linkbtn" id="reset" type="button" hidden>Clear all filters</button>
     </div>
-    <div class="field">
-      <label class="lbl" for="city">City</label>
-      <select id="city"><option value="">All cities</option></select>
-    </div>
-    <div class="field">
-      <label class="lbl" for="setting">Indoor / outdoor</label>
-      <select id="setting">
-        <option value="">Any</option><option>Indoor</option><option>Outdoor</option><option>Both</option>
-      </select>
-    </div>
-    <div class="field">
-      <label class="lbl" for="price">Starting price</label>
-      <select id="price">
-        <option value="">Any</option>
-        <option value="0-199">Under $200</option>
-        <option value="200-399">$200 - $399</option>
-        <option value="400-699">$400 - $699</option>
-        <option value="700-99999">$700+</option>
-      </select>
-      <div class="hint">Lowest total package price when published.</div>
-    </div>
-    <div class="field">
-      <label class="lbl" for="food">Food</label>
-      <select id="food">
-        <option value="">Any</option>
-        <option value="Yes">Food included</option>
-        <option value="Add-on">Food available as add-on</option>
-        <option value="No">Bring your own food</option>
-      </select>
-    </div>
-    <div class="field">
-      <label class="lbl" for="catering">Outside food policy</label>
-      <select id="catering">
-        <option value="">Any</option>
-        <option value="Yes">Outside food allowed</option>
-        <option value="Cake only">Cake or cupcakes only</option>
-      </select>
-      <div class="hint">Only about a third of venues state a policy.</div>
-    </div>
-    <div class="field">
-      <label class="lbl" for="guests">Number of guests</label>
-      <input type="number" id="guests" min="1" placeholder="e.g. 20">
-    </div>
-    <div class="field">
-      <label class="lbl" for="age">Child's age</label>
-      <input type="number" id="age" min="0" max="17" placeholder="e.g. 6">
-      <div class="hint">Venues that don't publish an age range stay in the results.</div>
-    </div>
-    <div class="field">
+    <div class="more" id="more" hidden>
+      <div class="field"><label for="setting">Indoor or outdoor</label>
+        <select id="setting"><option value="">Any</option><option>Indoor</option><option>Outdoor</option><option>Both</option></select></div>
+      <div class="field"><label for="price">Starting price</label>
+        <select id="price"><option value="">Any</option><option value="0-199">Under $200</option><option value="200-399">$200 to $399</option><option value="400-699">$400 to $699</option><option value="700-99999">$700 and up</option></select></div>
+      <div class="field"><label for="food">Food</label>
+        <select id="food"><option value="">Any</option><option value="Yes">Food included</option><option value="Add-on">Food as an add-on</option><option value="No">Bring your own food</option></select></div>
+      <div class="field"><label for="catering">Outside food</label>
+        <select id="catering"><option value="">Any</option><option value="Yes">Outside food allowed</option><option value="Cake only">Cake or cupcakes only</option></select>
+        <div class="hint">Only about a third of venues state a policy.</div></div>
       <label class="check"><input type="checkbox" id="pricedOnly"> Only show venues with a listed price</label>
     </div>
-  </aside>
+  </form>
+
+  <div class="chips" id="chips" role="group" aria-label="Venue type"></div>
 
   <main>
     <div class="bar">
       <div class="count" id="count" aria-live="polite"></div>
-      <label>Sort by
+      <label class="sort">Sort by
         <select id="sort">
           <option value="rec">Most recommended</option>
-          <option value="name">Name (A-Z)</option>
-          <option value="priceAsc">Starting price (low to high)</option>
-          <option value="capDesc">Max party size (high to low)</option>
+          <option value="name">Name (A to Z)</option>
+          <option value="priceAsc">Price, low to high</option>
+          <option value="capDesc">Largest parties first</option>
         </select>
       </label>
     </div>
@@ -153,17 +70,13 @@
 </div>
 
 <!-- BROWSE:START -->
-<section class="browse"><h2>Browse by city</h2><p><a href="/cities/reston/">Reston (27)</a> &middot; <a href="/cities/herndon/">Herndon (18)</a> &middot; <a href="/cities/chantilly/">Chantilly (9)</a> &middot; <a href="/cities/sterling/">Sterling (7)</a> &middot; <a href="/cities/fairfax/">Fairfax (6)</a> &middot; <a href="/cities/ashburn/">Ashburn (5)</a> &middot; <a href="/cities/centreville/">Centreville (4)</a> &middot; <a href="/cities/falls-church/">Falls Church (4)</a> &middot; <a href="/cities/springfield/">Springfield (3)</a></p><h2>Browse by venue type</h2><p><a href="/types/restaurant-private-dining/">Restaurant &amp; Private Dining (24)</a> &middot; <a href="/types/indoor-play-trampoline-arcade/">Indoor Play, Trampoline &amp; Arcade (19)</a> &middot; <a href="/types/nature-park-pavilion/">Nature, Park &amp; Pavilion (14)</a> &middot; <a href="/types/pool-rec-center/">Pool &amp; Rec Center (13)</a> &middot; <a href="/types/active-sports-climbing-ninja/">Active, Sports, Climbing &amp; Ninja (9)</a> &middot; <a href="/types/creative-craft-art/">Creative, Craft &amp; Art (9)</a> &middot; <a href="/types/bowling-golf-skating/">Bowling, Golf &amp; Skating (4)</a> &middot; <a href="/types/community-rental-hall/">Community &amp; Rental Hall (3)</a> &middot; <a href="/types/farm-zoo-animal/">Farm, Zoo &amp; Animal (3)</a> &middot; <a href="/types/museum-educational/">Museum &amp; Educational (3)</a></p><p><a href="/venues/">See every venue in one list</a></p></section>
+<footer class="site-foot"><div class="foot-in">
+<div><h2>Browse by city</h2><ul><li><a href="/cities/reston/">Reston</a></li><li><a href="/cities/herndon/">Herndon</a></li><li><a href="/cities/chantilly/">Chantilly</a></li><li><a href="/cities/sterling/">Sterling</a></li><li><a href="/cities/fairfax/">Fairfax</a></li><li><a href="/cities/ashburn/">Ashburn</a></li><li><a href="/cities/centreville/">Centreville</a></li><li><a href="/cities/falls-church/">Falls Church</a></li><li><a href="/cities/springfield/">Springfield</a></li></ul></div>
+<div><h2>Browse by venue type</h2><ul><li><a href="/types/restaurant-private-dining/">Restaurant &amp; Private Dining</a></li><li><a href="/types/indoor-play-trampoline-arcade/">Indoor Play, Trampoline &amp; Arcade</a></li><li><a href="/types/nature-park-pavilion/">Nature, Park &amp; Pavilion</a></li><li><a href="/types/pool-rec-center/">Pool &amp; Rec Center</a></li><li><a href="/types/active-sports-climbing-ninja/">Active, Sports, Climbing &amp; Ninja</a></li><li><a href="/types/creative-craft-art/">Creative, Craft &amp; Art</a></li><li><a href="/types/bowling-golf-skating/">Bowling, Golf &amp; Skating</a></li><li><a href="/types/community-rental-hall/">Community &amp; Rental Hall</a></li><li><a href="/types/farm-zoo-animal/">Farm, Zoo &amp; Animal</a></li><li><a href="/types/museum-educational/">Museum &amp; Educational</a></li></ul></div>
+<p class="claim wide"><strong>Own a party venue?</strong> <a href="mailto:hello@novapartyvenues.com">Claim or correct your listing</a> at hello@novapartyvenues.com.</p>
+<p class="wide">Prices and policies are gathered from venue websites, last reviewed November 2026, and can change. "Starting price" is the lowest total package price we found, not a quote. Always confirm details, availability and current pricing with the venue before booking. "Recommended by neighbors" counts how often a venue was suggested in a local parents' group.</p>
+</div></footer>
 <!-- BROWSE:END -->
-
-<footer>
-  <div class="owner">
-    <strong>Own a party venue?</strong> Claim or correct your listing:
-    <a href="mailto:hello@novapartyvenues.com">hello@novapartyvenues.com</a>
-  </div>
-
-  <p>Prices and policies are gathered from venue websites and can change. "Starting price" is the lowest total package price we found, not a quote. Always confirm details, availability and current pricing directly with the venue before booking. "Recommended by neighbors" counts how often a venue was suggested in a local parents' group.</p>
-</footer>
 
 <script src="/data.js"></script>
 <script src="/assets/slugs.js"></script>
@@ -171,8 +84,9 @@
 (function () {
   var V = window.VENUES || [];
   var $ = function (id) { return document.getElementById(id); };
+  var curType = "";
 
-  // Derive numeric age bounds from labels like "5-12", "4+", "All ages". Unknown = null (never excluded).
+  // Numeric age bounds from labels like "5-12", "4+", "All ages". Unknown = null (never excluded).
   V.forEach(function (v) {
     v._amin = null; v._amax = null;
     if (v.age === "All ages") { v._amin = 0; v._amax = 17; }
@@ -180,31 +94,38 @@
     else if (v.age && /^\d+-\d+$/.test(v.age)) { var p = v.age.split("-"); v._amin = parseInt(p[0], 10); v._amax = parseInt(p[1], 10); }
   });
 
-  function uniq(arr) { return Array.from(new Set(arr)).sort(); }
-  function fill(sel, values) {
-    values.forEach(function (v) { var o = document.createElement("option"); o.value = v; o.textContent = v; sel.appendChild(o); });
-  }
-  fill($("type"), uniq(V.map(function (v) { return v.t; })));
-  fill($("city"), uniq(V.map(function (v) { return v.c; })));
+  var TYPES = Array.from(new Set(V.map(function (v) { return v.t; }))).sort();
+  var CITIES = Array.from(new Set(V.map(function (v) { return v.c; }))).sort();
+  CITIES.forEach(function (c) { var o = document.createElement("option"); o.value = c; o.textContent = c; $("city").appendChild(o); });
 
-  ["q", "type", "city", "setting", "price", "food", "catering", "guests", "age", "pricedOnly", "sort"].forEach(function (id) {
-    $(id).addEventListener("input", render);
-    $(id).addEventListener("change", render);
-  });
-  $("reset").addEventListener("click", function () {
-    ["q", "type", "city", "setting", "price", "food", "catering", "guests", "age"].forEach(function (id) { $(id).value = ""; });
-    $("pricedOnly").checked = false;
-    $("sort").value = "rec";
-    render();
-  });
-
+  function tIdx(t) { return TYPES.indexOf(t) % 12; }
+  function typeLabel(t) { var p = t.split(" / "); return p.length > 1 ? p.slice(0, -1).join(", ") + " & " + p[p.length - 1] : p[0]; }
   function esc(s) { var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
   function money(n) { return "$" + (n % 1 ? n.toFixed(2) : n.toLocaleString("en-US")); }
 
-  function matches(v) {
+  var MORE = ["setting", "price", "food", "catering"];
+  var ALL_FIELDS = ["q", "city", "guests", "age"].concat(MORE);
+  ALL_FIELDS.concat(["pricedOnly", "sort"]).forEach(function (id) {
+    $(id).addEventListener("input", render);
+    $(id).addEventListener("change", render);
+  });
+  $("moreBtn").addEventListener("click", function () {
+    var open = $("more").hidden;
+    $("more").hidden = !open;
+    $("moreBtn").setAttribute("aria-expanded", String(open));
+  });
+  function clearAll() {
+    ALL_FIELDS.forEach(function (id) { $(id).value = ""; });
+    $("pricedOnly").checked = false;
+    curType = "";
+    render();
+  }
+  $("reset").addEventListener("click", clearAll);
+
+  function matches(v, skipType) {
     var q = $("q").value.trim().toLowerCase();
     if (q && (v.n + " " + v.t + " " + v.c + " " + (v.pn || "")).toLowerCase().indexOf(q) === -1) return false;
-    if ($("type").value && v.t !== $("type").value) return false;
+    if (!skipType && curType && v.t !== curType) return false;
     if ($("city").value && v.c !== $("city").value) return false;
     if ($("setting").value && v.s !== $("setting").value) return false;
     if ($("food").value && v.f !== $("food").value) return false;
@@ -242,43 +163,64 @@
   }
 
   function card(v) {
+    var guests = v.mn != null && v.mx != null ? v.mn + "-" + v.mx : v.mx != null ? "Up to " + v.mx : v.mn != null ? v.mn + "+" : "Ask venue";
+    var setting = v.s === "Both" ? "In & out" : (v.s || "Ask venue");
+    var slug = (window.SLUGS || {})[v.n];
     var badges = (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : "") +
                  (v.fl ? '<span class="badge warn">Details to confirm</span>' : "");
-    var size = v.mx != null ? ("Up to " + v.mx + " guests") : (v.mn != null ? ("Min " + v.mn + " guests") : "Party size: ask venue");
-    if (v.mx != null && v.mn != null) size = v.mn + "-" + v.mx + " guests";
-    var age = v.age ? ("Ages " + v.age) : "Age range: ask venue";
-    var priceLine = v.pr != null
-      ? '<div class="price">From ' + money(v.pr) + '</div>'
-      : '<div class="meta">Price not published</div>';
     var tags = [];
     if (v.f === "Yes") tags.push("Food included");
     if (v.f === "Add-on") tags.push("Food add-on");
     if (v.f === "No") tags.push("Bring your own food");
     if (v.k === "Yes") tags.push("Outside food OK");
     if (v.k === "Cake only") tags.push("Outside cake only");
+    var title = slug ? '<a href="/venues/' + esc(slug) + '/">' + esc(v.n) + '</a>' : esc(v.n);
     var actions = "";
-    var slug = (window.SLUGS || {})[v.n];
-    if (slug) actions += '<a class="btn ghost" href="/venues/' + esc(slug) + '/">Details</a>';
     if (v.w) actions += '<a class="btn primary" href="' + esc(v.w) + '" target="_blank" rel="noopener nofollow">Website</a>';
-    if (v.p) actions += '<a class="btn ghost" href="tel:' + esc(v.p.replace(/[^0-9+]/g, "")) + '">Call</a>';
-    if (v.a) actions += '<a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Map</a>';
-    return '<article class="card">' +
-      (badges ? '<div class="row">' + badges + '</div>' : "") +
-      '<h3>' + esc(v.n) + '</h3>' +
-      '<div class="meta">' + esc(v.t) + ' &middot; ' + esc(v.c) + (v.c === "Mobile" || v.c === "Unknown" ? "" : ", VA") + '</div>' +
-      priceLine +
-      '<div class="meta">' + esc(size) + ' &middot; ' + esc(age) + ' &middot; ' + esc(v.s) + '</div>' +
-      (v.pn ? '<p class="meta" style="margin:0">' + esc(v.pn) + '</p>' : "") +
+    if (slug) actions += '<a class="btn" href="/venues/' + esc(slug) + '/">Details</a>';
+    if (v.p) actions += '<a class="btn quiet" href="tel:' + esc(v.p.replace(/[^0-9+]/g, "")) + '">Call</a>';
+    if (v.a) actions += '<a class="btn quiet" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Map</a>';
+    return '<article class="card t' + tIdx(v.t) + '">' +
+      '<div class="card-top"><div class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>' + badges + '</div>' +
+      '<h3>' + title + '</h3>' +
+      '<div class="loc">' + esc(v.c) + (v.c === "Mobile" || v.c === "Unknown" ? "" : ", VA") + '</div>' +
+      (v.pr != null ? '<div class="price"><small>From</small> ' + money(v.pr) + '</div>' : '<div class="price none">Price not published</div>') +
+      '<div class="specs"><div><b>' + esc(guests) + '</b><span>Guests</span></div><div><b>' + esc(v.age || "Ask venue") + '</b><span>Ages</span></div><div><b>' + esc(setting) + '</b><span>Setting</span></div></div>' +
+      (v.pn ? '<p class="note">' + esc(v.pn) + '</p>' : "") +
       (tags.length ? '<div class="tags">' + tags.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join("") + '</div>' : "") +
       '<div class="actions">' + actions + '</div>' +
       '</article>';
   }
 
+  function renderChips() {
+    var counts = {};
+    V.forEach(function (v) { if (matches(v, true)) counts[v.t] = (counts[v.t] || 0) + 1; });
+    var total = Object.keys(counts).reduce(function (a, k) { return a + counts[k]; }, 0);
+    var h = '<button type="button" class="chip" data-t="" aria-pressed="' + (curType === "") + '">All types <span class="n">' + total + '</span></button>';
+    TYPES.forEach(function (t) {
+      var n = counts[t] || 0;
+      h += '<button type="button" class="chip t' + tIdx(t) + '" data-t="' + esc(t) + '" aria-pressed="' + (curType === t) + '"' + (n === 0 && curType !== t ? " disabled" : "") + '><span class="dot"></span>' + esc(typeLabel(t)) + ' <span class="n">' + n + '</span></button>';
+    });
+    $("chips").innerHTML = h;
+  }
+  $("chips").addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest(".chip") : null;
+    if (!b || b.disabled) return;
+    curType = b.getAttribute("data-t");
+    render();
+  });
+
   function render() {
-    var list = sortList(V.filter(matches));
-    $("count").textContent = list.length + (list.length === 1 ? " venue" : " venues");
+    var list = sortList(V.filter(function (v) { return matches(v, false); }));
+    var active = ALL_FIELDS.some(function (id) { return $(id).value !== ""; }) || $("pricedOnly").checked || curType !== "";
+    var moreActive = MORE.filter(function (id) { return $(id).value !== ""; }).length + ($("pricedOnly").checked ? 1 : 0);
+    $("moreBtn").textContent = "More filters" + (moreActive ? " (" + moreActive + ")" : "");
+    $("reset").hidden = !active;
+    $("count").textContent = list.length + (list.length === 1 ? " venue" : " venues") + (active ? " match" : "");
+    renderChips();
     $("results").innerHTML = list.length ? list.map(card).join("") :
-      '<div class="empty">No venues match those filters. Try widening the price, guest count or age, or reset the filters.</div>';
+      '<div class="empty"><b>No venues match those filters</b><p>Try a different city, a larger price range, or fewer filters.</p><button class="btn primary" type="button" id="emptyReset">Clear all filters</button></div>';
+    var er = $("emptyReset"); if (er) er.addEventListener("click", clearAll);
   }
   render();
 })();
