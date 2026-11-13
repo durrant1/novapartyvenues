@@ -91,17 +91,18 @@ function write(rel, content) {
 }
 
 /* ---------- shared pieces ---------- */
-const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400..700&display=swap">\n';
+const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500..800&family=Figtree:wght@400..700&display=swap">\n';
 const ICONS = '<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="icon" href="/favicon.ico" sizes="48x48">\n<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n';
 const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.6l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9z"/></svg>';
 const favBtn = (n) => '<button type="button" class="fav" data-n="' + esc(n) + '" aria-pressed="false" aria-label="Save ' + esc(n) + ' to favorites">' + STAR + '</button>';
-const LOGO = '<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="10" cy="11" r="7.5" fill="#d6333b"/><circle cx="20" cy="11" r="7.5" fill="#ffc83d" fill-opacity=".92"/><circle cx="15" cy="18.5" r="7.5" fill="#22a58a" fill-opacity=".92"/></svg>';
+const LOGO = '<svg viewBox="0 0 32 40" aria-hidden="true">' + require('./logo').inner() + '</svg>';
 const HEADER = '<header class="site-bar"><div class="bar-in"><a class="brand" href="/">' + LOGO + BRAND + '</a><nav aria-label="Main"><a href="/">Search venues</a><a href="/venues/">All venues</a></nav></div></header>';
 
 function footer() {
   const cl = cities.map((c) => '<li><a href="' + cityUrl(c) + '">' + esc(c) + '</a></li>').join('');
   const tl = types.map((t) => '<li><a href="' + typeUrl(t) + '">' + esc(typeLabel(t)) + '</a></li>').join('');
   return '<footer class="site-foot"><div class="foot-in">\n' +
+    '<div class="foot-brand wide">' + LOGO + BRAND + '</div>\n' +
     '<div><h2>Browse by city</h2><ul>' + cl + '</ul></div>\n' +
     '<div><h2>Browse by venue type</h2><ul>' + tl + '</ul></div>\n' +
     (CONTACT ? '<p class="claim wide"><strong>Own a party venue?</strong> <a href="mailto:' + esc(CONTACT) + '">Claim or correct your listing</a> at ' + esc(CONTACT) + '.</p>\n' : '') +
@@ -120,10 +121,10 @@ function layout(o) {
     (o.noindex ? '<meta name="robots" content="noindex, follow">\n' : '') +
     '<meta property="og:type" content="website">\n<meta property="og:site_name" content="' + BRAND + '">\n' +
     '<meta property="og:title" content="' + esc(o.title) + '">\n<meta property="og:description" content="' + esc(o.desc) + '">\n' +
-    '<meta property="og:url" content="' + url + '">\n' +
+    '<meta property="og:url" content="' + url + '">\n<meta property="og:image" content="' + SITE + '/og.png">\n<meta name="twitter:card" content="summary_large_image">\n<meta name="theme-color" content="#14161f">\n' +
     ICONS + FONTS + '<link rel="stylesheet" href="/assets/style.css">\n' + ld + '\n</head>\n<body>\n' +
     HEADER + '\n' +
-    '<main class="page">\n' + o.body + '\n</main>\n' + footer() + '\n<script src="/assets/fav.js" defer></script>\n</body>\n</html>\n';
+    '<main class="page">\n' + o.body + '\n</main>\n' + footer() + '\n<script src="/assets/fav.js" defer></script>\n<script src="/assets/ui.js" defer></script>\n</body>\n</html>\n';
 }
 
 function crumbs(items) {
@@ -143,12 +144,12 @@ function card(v) {
   const guests = v.mn != null && v.mx != null ? v.mn + '-' + v.mx : v.mx != null ? 'Up to ' + v.mx : v.mn != null ? v.mn + '+' : 'Ask venue';
   const setting = v.s === 'Both' ? 'In & out' : v.s || 'Ask venue';
   return '<article class="card t' + tIdx(v.t) + '">' + favBtn(v.n) +
-    '<div class="card-top"><div class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>' + (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') + '</div>' +
-    '<h3><a href="' + venueUrl(v) + '">' + esc(v.n) + '</a></h3>' +
+    '<div class="card-top"><span class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</span>' + (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') + '</div>' +
+    '<div class="card-body"><h3><a href="' + venueUrl(v) + '">' + esc(v.n) + '</a></h3>' +
     '<div class="loc">' + esc(cityLine(v)) + '</div>' +
     (v.pr != null ? '<div class="price"><small>From</small> ' + money(v.pr) + '</div>' : '<div class="price none">Price not published</div>') +
     '<div class="specs"><div><b>' + esc(guests) + '</b><span>Guests</span></div><div><b>' + esc(v.age || 'Ask venue') + '</b><span>Ages</span></div><div><b>' + esc(setting) + '</b><span>Setting</span></div></div>' +
-    (v.pn ? '<p class="note">' + esc(v.pn) + '</p>' : '') + '</article>';
+    (v.pn ? '<p class="note">' + esc(v.pn) + '</p>' : '') + '</div></article>';
 }
 const grid = (list) => '<div class="grid">' + list.map(card).join('\n') + '</div>';
 
@@ -176,8 +177,8 @@ function venuePage(v) {
     (v.p ? '<a class="btn block" href="tel:' + esc(v.p.replace(/[^0-9+]/g, '')) + '">Call ' + esc(v.p) + '</a>' : '') +
     (v.a ? '<a class="btn block" href="https://www.google.com/maps/search/?api=1&amp;query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Get directions</a>' : '') +
     '<p class="small">Last reviewed ' + REVIEWED + '. Prices and policies change, so confirm with the venue before booking.</p></div></aside>';
-  const body = bc.html + '\n<div class="vtype t' + tIdx(v.t) + '"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</div>\n<div class="vhead"><h1>' + esc(v.n) + '</h1>' + favBtn(v.n) + '</div>\n' +
-    '<p class="lead">' + esc(cityLine(v)) + (v.m >= 3 ? ' <span class="badge rec">Recommended by neighbors</span>' : '') + '</p>\n' + flag +
+  const body = bc.html + '\n<div class="vhero t' + tIdx(v.t) + '"><span class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</span>\n<div class="vhead"><h1>' + esc(v.n) + '</h1>' + favBtn(v.n) + '</div>\n' +
+    '<div class="vloc"><span>' + esc(cityLine(v)) + '</span>' + (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') + '</div></div>\n' + flag +
     '<div class="vlayout"><div>\n' + statHtml + '\n' +
     (v.pn ? '<div class="pricebox"><p><strong>Pricing and details.</strong> ' + esc(v.pn) + '.</p></div>\n' : '') +
     '<h2>Good to know</h2>\n<dl class="facts">' + facts + '</dl>\n</div>\n' + side + '</div>\n' +
@@ -224,7 +225,7 @@ function cityPage(c) {
     'The most common types are ' + joinList(topCounts(list, 't', typeLabel, 3)) + '. ' + priceSentence(list) + ' ' + settingSentence(list);
   const bc = crumbs([{ name: 'Home', url: '/' }, { name: c, url: cityUrl(c) }]);
   const others = cities.filter((x) => x !== c).map((x) => '<li><a href="' + cityUrl(x) + '">' + esc(x) + '</a></li>').join('');
-  const body = bc.html + '\n<h1>Kids’ Birthday Party Venues in ' + esc(c) + ', VA</h1>\n<p class="lead">' + esc(intro.replace(/\s+/g, ' ').trim()) + '</p>\n' +
+  const body = bc.html + '\n<div class="phero"><h1>Kids’ Birthday Party Venues in ' + esc(c) + ', VA</h1>\n<p class="lead">' + esc(intro.replace(/\s+/g, ' ').trim()) + '</p></div>\n' +
     '<p><a href="/">Use the search page to filter by price, guest count, age and food policy.</a></p>\n' +
     '<h2>' + plural(list.length, 'venue') + ' in ' + esc(c) + '</h2>\n' + grid(list) + '\n<h2>Other cities</h2>\n<p>' + others + '</p>';
   return layout({ title: clip('Kids’ Birthday Party Venues in ' + c + ', VA | ' + BRAND, 70),
@@ -238,7 +239,7 @@ function typePage(t) {
     'Most are in ' + joinList(topCounts(list.filter((v) => v.c !== 'Unknown' && v.c !== 'Mobile'), 'c', (x) => x, 3)) + '. ' + priceSentence(list) + ' ' + settingSentence(list);
   const bc = crumbs([{ name: 'Home', url: '/' }, { name: label, url: typeUrl(t) }]);
   const others = types.filter((x) => x !== t).map((x) => '<li><a href="' + typeUrl(x) + '">' + esc(typeLabel(x)) + '</a></li>').join('');
-  const body = bc.html + '\n<h1>' + esc(label) + ': Kids’ Birthday Party Venues in Northern Virginia</h1>\n<p class="lead">' + esc(intro.replace(/\s+/g, ' ').trim()) + '</p>\n' +
+  const body = bc.html + '\n<div class="phero"><h1>' + esc(label) + ': Kids’ Birthday Party Venues in Northern Virginia</h1>\n<p class="lead">' + esc(intro.replace(/\s+/g, ' ').trim()) + '</p></div>\n' +
     '<p><a href="/">Use the search page to filter by city, price, guest count and age.</a></p>\n' +
     '<h2>' + plural(list.length, 'venue') + '</h2>\n' + grid(list) + '\n<h2>Other venue types</h2>\n<p>' + others + '</p>';
   return layout({ title: clip(label + ' Birthday Party Venues in Northern Virginia', 70),
@@ -255,12 +256,13 @@ for (const t of types) write('types/' + slugify(t) + '/index.html', typePage(t))
   const names = Object.keys(groups).sort((a, b) => (a === 'Other') - (b === 'Other') || a.localeCompare(b));
   const sections = names.map((g) => '<h2>' + esc(g) + ' (' + groups[g].length + ')</h2>\n<ul class="plain">' +
     groups[g].sort((a, b) => a.n.localeCompare(b.n)).map((v) => '<li><a href="' + venueUrl(v) + '">' + esc(v.n) + '</a> <span class="meta">' + esc(typeLabel(v.t)) + (v.pr != null ? ' &middot; from ' + money(v.pr) : '') + '</span></li>').join('') + '</ul>').join('\n');
-  const body = bc.html + '\n<h1>All Kids’ Birthday Party Venues in Northern Virginia</h1>\n<p class="lead">' + plural(LIVE.length, 'venue') + ', grouped by city. <a href="/">Search and filter instead.</a></p>\n' + sections;
+  const body = bc.html + '\n<div class="phero"><h1>All Kids’ Birthday Party Venues in Northern Virginia</h1>\n<p class="lead">' + plural(LIVE.length, 'venue') + ', grouped by city. <a href="/">Search and filter instead.</a></p></div>\n' + sections;
   write('venues/index.html', layout({ title: 'All Kids’ Birthday Party Venues in Northern Virginia | ' + BRAND,
     desc: clip('Browse all ' + LIVE.length + ' researched kids’ birthday party venues in Northern Virginia, grouped by city.', 155), path: '/venues/', body, jsonld: [bc.ld] }));
 })();
 
 /* ---------- assets, sitemap, robots, 404 ---------- */
+write('assets/ui.js', fs.readFileSync(path.join(__dirname, 'ui.js'), 'utf8'));
 write('assets/fav.js', fs.readFileSync(path.join(__dirname, 'fav.js'), 'utf8'));
 write('assets/style.css', fs.readFileSync(path.join(__dirname, 'style.css'), 'utf8'));
 

@@ -25,7 +25,11 @@
   FAVS.paint = paint;
   document.addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest(".fav[data-n]");
-    if (b) { e.preventDefault(); FAVS.toggle(b.getAttribute("data-n")); }
+    if (b) {
+      e.preventDefault(); FAVS.toggle(b.getAttribute("data-n"));
+      var again = document.querySelectorAll('.fav[data-n]'); // restart the pop on whichever buttons now exist
+      [].forEach.call(again, function (x) { if (x.getAttribute("data-n") === b.getAttribute("data-n")) { x.classList.remove("pop-it"); void x.offsetWidth; x.classList.add("pop-it"); } });
+    }
   });
   window.addEventListener("storage", function (e) { if (e.key === KEY) { list = read(); paint(); document.dispatchEvent(new CustomEvent("favchange", { detail: {} })); } });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { paint(); }); else paint();
