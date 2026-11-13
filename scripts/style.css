@@ -237,3 +237,6 @@ ul.plain li { padding: 8px 0; border-bottom: 1px solid var(--line); break-inside
 .pill { display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: .86rem; font-weight: 600; padding: 5px 8px 5px 12px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--soft); color: var(--ink); cursor: pointer; }
 .pill:hover { background: var(--line); }
 .pill b { font-weight: 800; font-size: 1.1rem; line-height: 1; }
+.pin-star { display: block; width: 32px; height: 32px; fill: #ffc83d; stroke: #7a5200; stroke-width: 1.6; stroke-linejoin: round; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .5)); transition: transform .12s; }
+.pin-wrap.hl .pin-star { transform: scale(1.35); }
+.pin-fav { z-index: 600 !important; }

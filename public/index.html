@@ -193,7 +193,7 @@
     paintMore();
   });
   $("favBtn").addEventListener("click", function () { showFav = !showFav; render(); });
-  document.addEventListener("favchange", function () { if (showFav) render(); else paintMore(); });
+  document.addEventListener("favchange", function () { if (showFav) render(); else paintMore(); refreshPins(); });
   $("applied").addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest(".pill"); if (!b) return;
     var k = b.getAttribute("data-k");
@@ -346,6 +346,14 @@
     sc.onerror = function () { loading = false; queued = []; $("mapnote").textContent = "The map could not load. Check your connection and switch views to retry."; };
     document.head.appendChild(sc);
   }
+  function pinIcon(v) {
+    if (FAVS.has(v.n)) return L.divIcon({ className: "pin-wrap pin-fav", html: '<svg class="pin-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.6l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9z"/></svg>', iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -16] });
+    return L.divIcon({ className: "pin-wrap", html: '<span class="pin t' + tIdx(v.t) + '"></span>', iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -12] });
+  }
+  function refreshPins() {
+    if (!mapObj) return;
+    curList.forEach(function (v) { var m = markers[v.n]; if (m) m.setIcon(pinIcon(v)); });
+  }
   function updateMap(list) {
     if (!mapObj) return;
     mapObj.invalidateSize();
@@ -355,7 +363,7 @@
       var c = COORDS[v.n];
       if (!c) { missing++; return; }
       var m = L.marker(c, {
-        icon: L.divIcon({ className: "pin-wrap", html: '<span class="pin t' + tIdx(v.t) + '"></span>', iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -12] }),
+        icon: pinIcon(v),
         title: v.n, riseOnHover: true
       });
       m.bindPopup(popup(v), { maxWidth: 260 });
