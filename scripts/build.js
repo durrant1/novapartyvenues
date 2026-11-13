@@ -24,7 +24,7 @@ const PUB = path.join(ROOT, 'public');
 const SITE = 'https://novapartyvenues.com';
 const BRAND = 'NoVA Party Venues';
 const MIN_PAGE = 3;            // minimum venues before a city or type gets its own page
-const CONTACT = null;          // set to a real email address to show a "claim your listing" line
+const CONTACT = 'hello@novapartyvenues.com'; // shown in the "claim your listing" line (forwards via Cloudflare Email Routing)
 const TODAY = new Date().toISOString().slice(0, 10);
 const REVIEWED = 'November 2026';
 
