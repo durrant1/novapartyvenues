@@ -1,0 +1,42 @@
+name: Apply approved listing claims
+
+on:
+  schedule:
+    - cron: '17 */4 * * *'   # every 4 hours
+  workflow_dispatch:          # "Run workflow" button for an instant update
+
+permissions:
+  contents: write
+
+concurrency:
+  group: claims
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Pull approved claims from the Google Sheet
+        id: claims
+        env:
+          CLAIMS_CSV_URL: ${{ secrets.CLAIMS_CSV_URL }}
+        run: node scripts/apply-claims.js
+
+      - name: Rebuild pages
+        if: steps.claims.outputs.CHANGED == '1'
+        run: node scripts/build.js
+
+      - name: Commit and push (Cloudflare deploys from main)
+        if: steps.claims.outputs.CHANGED == '1'
+        run: |
+          git config user.name "claims-bot"
+          git config user.email "claims-bot@users.noreply.github.com"
+          git add public
+          git commit -m "Apply approved listing claims"
+          git push

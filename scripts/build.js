@@ -25,6 +25,10 @@ const SITE = 'https://novapartyvenues.com';
 const BRAND = 'NoVA Party Venues';
 const MIN_PAGE = 3;            // minimum venues before a city or type gets its own page
 const CONTACT = 'hello@novapartyvenues.com'; // shown in the "claim your listing" line (forwards via Cloudflare Email Routing)
+// Google Form "Get pre-filled link" URL with the Listing ID answer replaced by {slug}.
+// Leave empty to fall back to email. Example:
+// 'https://docs.google.com/forms/d/e/FORM_ID/viewform?usp=pp_url&entry.123456789={slug}'
+const CLAIM_FORM = '';
 const TODAY = new Date().toISOString().slice(0, 10);
 const REVIEWED = 'November 2026';
 
@@ -49,7 +53,7 @@ const cityLine = (v) => (v.c === 'Mobile' ? 'Mobile service' : v.c === 'Unknown'
 const sizeText = (v) => (v.mn != null && v.mx != null ? v.mn + '-' + v.mx + ' guests' : v.mx != null ? 'Up to ' + v.mx + ' guests' : v.mn != null ? 'Minimum ' + v.mn + ' guests' : 'Ask the venue');
 const ageText = (v) => (v.age ? (v.age === 'All ages' ? 'All ages' : 'Ages ' + v.age) : 'Ask the venue');
 const foodText = (v) => ({ Yes: 'Food included in packages', 'Add-on': 'Food available as an add-on', No: 'Bring your own food' }[v.f] || 'Ask the venue');
-const cateringText = (v) => ({ Yes: 'Outside food allowed', 'Cake only': 'Outside cake or cupcakes only' }[v.k] || 'Not stated');
+const cateringText = (v) => ({ Yes: 'Outside food allowed', 'Cake only': 'Outside cake or cupcakes only', No: 'No outside food' }[v.k] || 'Not stated');
 const priceText = (v) => (v.pr != null ? 'From ' + money(v.pr) : 'Not published');
 
 function parseAddr(a) {
@@ -80,6 +84,10 @@ const typeHas = new Set(types);
 const cityUrl = (c) => '/cities/' + slugify(c) + '/';
 const typeUrl = (t) => '/types/' + slugify(t) + '/';
 const venueUrl = (v) => '/venues/' + v.slug + '/';
+const claimUrl = (v) => CLAIM_FORM
+  ? CLAIM_FORM.replace('{slug}', v ? v.slug : '')
+  : 'mailto:' + CONTACT + (v ? '?subject=' + encodeURIComponent('Claim listing: ' + v.n) : '');
+const claimDate = (v) => new Date(v.cl + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
 /* ---------- output ---------- */
 for (const d of ['venues', 'cities', 'types']) fs.rmSync(path.join(PUB, d), { recursive: true, force: true });
@@ -106,7 +114,7 @@ function footer() {
     '<div class="foot-brand wide">' + LOGO + BRAND + '</div>\n' +
     '<div><h2>Browse by city</h2><ul>' + cl + '</ul></div>\n' +
     '<div><h2>Browse by venue type</h2><ul>' + tl + '</ul></div>\n' +
-    (CONTACT ? '<p class="claim wide"><strong>Own a party venue?</strong> <a href="mailto:' + esc(CONTACT) + '">Claim or correct your listing</a> at ' + esc(CONTACT) + '.</p>\n' : '') +
+    (CONTACT ? '<p class="claim wide"><strong>Own a party venue?</strong> <a href="' + esc(claimUrl()) + '">Claim or update your listing</a>, free.</p>\n' : '') +
     '<p class="wide">Prices and policies are gathered from venue websites, last reviewed ' + REVIEWED + ', and can change. "Starting price" is the lowest total package price we found, not a quote. Always confirm details, availability and current pricing with the venue before booking. "Recommended by neighbors" counts how often a venue was suggested in a local parents\' group.</p>\n' +
     '</div></footer>';
 }
@@ -190,9 +198,10 @@ function venuePage(v) {
     (v.w ? '<a class="btn primary block" href="' + esc(v.w) + '" target="_blank" rel="noopener nofollow">Visit venue website</a>' : '') +
     (v.p ? '<a class="btn block" href="tel:' + esc(v.p.replace(/[^0-9+]/g, '')) + '">Call ' + esc(v.p) + '</a>' : '') +
     (v.a ? '<a class="btn block" href="https://www.google.com/maps/search/?api=1&amp;query=' + encodeURIComponent(v.a) + '" target="_blank" rel="noopener">Get directions</a>' : '') +
-    '<p class="small">Last reviewed ' + REVIEWED + '. Prices and policies change, so confirm with the venue before booking.</p></div></aside>';
+    '<p class="small">' + (v.cl ? 'Details updated by the venue on ' + claimDate(v) : 'Last reviewed ' + REVIEWED) + '. Prices and policies change, so confirm with the venue before booking.</p>' +
+    '<p class="small claimline">' + (v.cl ? 'Venue owner? <a href="' + esc(claimUrl(v)) + '">Update this listing</a>' : 'Own this venue? <a href="' + esc(claimUrl(v)) + '">Claim this listing</a>, free') + '</p></div></aside>';
   const body = bc.html + '\n<div class="vhero t' + tIdx(v.t) + '"><span class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</span>\n<div class="vhead"><h1>' + esc(v.n) + '</h1>' + favBtn(v.n) + '</div>\n' +
-    '<div class="vloc"><span>' + esc(cityLine(v)) + '</span>' + (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') + '</div></div>\n' + flag +
+    '<div class="vloc"><span>' + esc(cityLine(v)) + '</span>' + (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') + (v.cl ? '<span class="badge claimed">Confirmed by venue</span>' : '') + '</div></div>\n' + flag +
     '<div class="vlayout"><div>\n' + statHtml + '\n' +
     (v.pn ? '<div class="pricebox"><p><strong>Pricing and details.</strong> ' + esc(v.pn) + '.</p></div>\n' : '') + locBox(v) +
     '<h2>Good to know</h2>\n<dl class="facts">' + facts + '</dl>\n</div>\n' + side + '</div>\n' +

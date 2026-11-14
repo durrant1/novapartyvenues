@@ -144,6 +144,8 @@ input:focus, select:focus { border-color: var(--orange); box-shadow: 0 0 0 4px r
 .tag { font-size: .78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--soft); }
 .badge { display: inline-flex; font-size: .76rem; font-weight: 800; padding: 3px 11px; border-radius: 999px; white-space: nowrap; background: var(--ink); color: var(--bg); }
 .badge.rec { background: #14161f; color: #ffc24b; }
+.badge.claimed { background: var(--blue); color: #14161f; }
+.side-card .claimline { padding-top: 8px; border-top: 1px solid var(--line); }
 .badge.multi { background: var(--blue); color: #14161f; }
 .locbox { margin-top: 16px; border: 1.5px solid var(--line); border-radius: 20px; padding: 16px 18px; background: var(--card); }
 .locbox h2 { margin: 0 0 6px; font-size: 1.05rem; }
