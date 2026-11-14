@@ -144,6 +144,13 @@ input:focus, select:focus { border-color: var(--orange); box-shadow: 0 0 0 4px r
 .tag { font-size: .78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--soft); }
 .badge { display: inline-flex; font-size: .76rem; font-weight: 800; padding: 3px 11px; border-radius: 999px; white-space: nowrap; background: var(--ink); color: var(--bg); }
 .badge.rec { background: #14161f; color: #ffc24b; }
+.badge.multi { background: var(--blue); color: #14161f; }
+.locbox { margin-top: 16px; border: 1.5px solid var(--line); border-radius: 20px; padding: 16px 18px; background: var(--card); }
+.locbox h2 { margin: 0 0 6px; font-size: 1.05rem; }
+.locbox p { margin: 6px 0; }
+.locbox .lochead { font-weight: 800; font-size: .85rem; margin-top: 12px; }
+.locbox ul { margin: 4px 0 0; padding-left: 20px; }
+.locbox li span { color: var(--muted); }
 .badge.warn { background: var(--warn); color: var(--warn-ink); }
 .actions { margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding-top: 6px; position: relative; z-index: 2; }
 .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 18px; border-radius: 999px; text-decoration: none; font-weight: 800; font-size: .92rem; border: 1.5px solid var(--ink); color: var(--ink); background: transparent; cursor: pointer; font-family: var(--body); transition: background-color .2s, transform .15s, filter .2s; }

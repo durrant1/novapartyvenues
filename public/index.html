@@ -274,6 +274,7 @@
     var setting = v.s === "Both" ? "In & out" : (v.s || "Ask venue");
     var slug = (window.SLUGS || {})[v.n];
     var badges = (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : "") +
+                 (v.grp ? '<span class="badge multi">Multiple locations</span>' : "") +
                  (v.fl ? '<span class="badge warn">Details to confirm</span>' : "");
     var tags = [];
     if (v.f === "Yes") tags.push("Food included");

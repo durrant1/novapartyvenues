@@ -67,6 +67,7 @@ for (const v of ALL) {
   used.add(v.slug);
   v.index = !v.fl;            // venues flagged "details to confirm" get noindex and no sitemap entry
 }
+const byGrp = groupBy(ALL.filter((v) => v.grp), 'grp');
 const LIVE = ALL.filter((v) => v.index);
 const placed = LIVE.filter((v) => v.c !== 'Unknown' && v.c !== 'Mobile');
 const byCity = groupBy(placed, 'c');
@@ -144,7 +145,7 @@ function card(v) {
   const guests = v.mn != null && v.mx != null ? v.mn + '-' + v.mx : v.mx != null ? 'Up to ' + v.mx : v.mn != null ? v.mn + '+' : 'Ask venue';
   const setting = v.s === 'Both' ? 'In & out' : v.s || 'Ask venue';
   return '<article class="card t' + tIdx(v.t) + '">' + favBtn(v.n) +
-    '<div class="card-top"><span class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</span>' + (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') + '</div>' +
+    '<div class="card-top"><span class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</span>' + (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') + (v.grp ? '<span class="badge multi">Multiple locations</span>' : '') + '</div>' +
     '<div class="card-body"><h3><a href="' + venueUrl(v) + '">' + esc(v.n) + '</a></h3>' +
     '<div class="loc">' + esc(cityLine(v)) + '</div>' +
     (v.pr != null ? '<div class="price"><small>From</small> ' + money(v.pr) + '</div>' : '<div class="price none">Price not published</div>') +
@@ -154,6 +155,19 @@ function card(v) {
 const grid = (list) => '<div class="grid">' + list.map(card).join('\n') + '</div>';
 
 /* ---------- venue pages ---------- */
+// Note for businesses with more than one location: links to sibling listings plus any other known locations.
+function locBox(v) {
+  if (!v.grp) return '';
+  const sibs = (byGrp[v.grp] || []).filter((x) => x !== v);
+  const extra = v.ol || [];
+  if (!sibs.length && !extra.length) return '';
+  const total = 1 + sibs.length + extra.length;
+  let h = '<div class="locbox"><h2>' + esc(v.grp) + ' has multiple locations</h2><p>This listing is for the <strong>' + esc(v.c) + '</strong> location. Details, pricing and party rules can differ between locations, so check the one you plan to book.</p>';
+  if (sibs.length) h += '<p class="lochead">Other locations on this site</p><ul>' + sibs.map((x) => '<li><a href="' + venueUrl(x) + '">' + esc(x.n) + '</a> <span>' + esc(cityLine(x)) + '</span></li>').join('') + '</ul>';
+  if (extra.length) h += '<p class="lochead">Also at</p><ul>' + extra.map((x) => '<li>' + esc((/,/.test(x.c) ? x.c : x.c + ', VA') + (x.a ? ' \u2013 ' + x.a : '')) + '</li>').join('') + '</ul>';
+  return h + '</div>\n';
+}
+
 function venuePage(v) {
   const peers = LIVE.filter((o) => o !== v);
   const sameCity = peers.filter((o) => o.c === v.c && v.c !== 'Unknown' && v.c !== 'Mobile').sort(rank).slice(0, 4);
@@ -180,7 +194,7 @@ function venuePage(v) {
   const body = bc.html + '\n<div class="vhero t' + tIdx(v.t) + '"><span class="card-type"><span class="dot"></span>' + esc(typeLabel(v.t)) + '</span>\n<div class="vhead"><h1>' + esc(v.n) + '</h1>' + favBtn(v.n) + '</div>\n' +
     '<div class="vloc"><span>' + esc(cityLine(v)) + '</span>' + (v.m >= 3 ? '<span class="badge rec">Recommended by neighbors</span>' : '') + '</div></div>\n' + flag +
     '<div class="vlayout"><div>\n' + statHtml + '\n' +
-    (v.pn ? '<div class="pricebox"><p><strong>Pricing and details.</strong> ' + esc(v.pn) + '.</p></div>\n' : '') +
+    (v.pn ? '<div class="pricebox"><p><strong>Pricing and details.</strong> ' + esc(v.pn) + '.</p></div>\n' : '') + locBox(v) +
     '<h2>Good to know</h2>\n<dl class="facts">' + facts + '</dl>\n</div>\n' + side + '</div>\n' +
     (sameCity.length ? '<h2>More venues in ' + esc(v.c) + '</h2>\n' + grid(sameCity) + '\n' : '') +
     (sameType.length ? '<h2>Similar venues: ' + esc(typeLabel(v.t)) + '</h2>\n' + grid(sameType) + '\n' : '') +
