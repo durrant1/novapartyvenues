@@ -25,10 +25,10 @@ const SITE = 'https://novapartyvenues.com';
 const BRAND = 'NoVA Party Venues';
 const MIN_PAGE = 3;            // minimum venues before a city or type gets its own page
 const CONTACT = 'hello@novapartyvenues.com'; // shown in the "claim your listing" line (forwards via Cloudflare Email Routing)
-// Google Form "Get pre-filled link" URL with the Listing ID answer replaced by {slug}.
+// Tally claim form; {slug} fills the hidden "listing" field.
 // Leave empty to fall back to email. Example:
 // 'https://docs.google.com/forms/d/e/FORM_ID/viewform?usp=pp_url&entry.123456789={slug}'
-const CLAIM_FORM = '';
+const CLAIM_FORM = 'https://tally.so/r/Ar2E8D?listing={slug}';
 const TODAY = new Date().toISOString().slice(0, 10);
 const REVIEWED = 'November 2026';
 
